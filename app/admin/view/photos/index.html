@@ -1,0 +1,470 @@
+{extend name="pub/base2" /}
+{block name="title"}
+<title>图片管理</title>
+<style>
+    .hello {
+        background-attachment: fixed;
+    }
+
+    .layui-layer,
+    .layui-layer-page .layui-layer-btn .layui-layer-btn0 {
+        border-color: #E6E3E6;
+        background-color: #FFF;
+        color: black;
+    }
+
+    .order {
+        width: 140px;
+    }
+
+    /* .order:hover>.show{
+      display: none;
+  }
+  .order:hover>.edit{
+      display: block;
+  } */
+    .edit {
+        display: none;
+        width: 100%;
+        padding: 5px 0;
+    }
+
+    .Hui-iconfont {
+        cursor: pointer;
+    }
+
+    .picture-thumb {
+        cursor: pointer;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<section class="Hui-admin-article">
+    <nav class="breadcrumb" style="background-color:#fff;padding: 0 24px"><i class="Hui-iconfont">&#xe67f;</i> 首页
+        <span class="c-gray en">&gt;</span>
+        章节管理
+        <span class="c-gray en">&gt;</span>
+        图片列表
+        <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px"
+            href="javascript:location.replace(location.href);" title="刷新"><i class="Hui-iconfont">&#xe68f;</i></a>
+    </nav>
+    <article class="Hui-admin-content clearfix">
+
+        <div class="panel mt-20">
+            <div class="panel-body">
+                <div class="clearfix">
+                    <!-- <form action="{:url('upload')}" enctype="multipart/form-data" method="post">
+                        <input type="hidden" value="{$chapter_id}" name="chapter_id">
+                        <input type="hidden" value="{$book_id}" name="book_id">
+                        <div class="formControls col-xs-3 col-sm-3">
+                            <input type="file" multiple="multiple" name="image[]" class="input-text">
+                        </div>
+                        <div class="formControls col-xs-6 col-sm-6">
+                            <input class="btn btn-primary radius" type="submit" value="上传"/>&nbsp;<span
+                                style="color: red">图片大小不要超过2M，格式只能是jpg</span>
+                        </div>
+                    </form> -->
+                    <div class="layui-upload">
+                        <div class="layui-upload-list">
+                            <table class="layui-table">
+                                <thead>
+                                    <tr>
+                                        <th>文件名</th>
+                                        <th>大小</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="demoList"></tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="layui-btn layui-btn-normal" id="testList">选择多张图片</button>
+                        <button type="button" class="layui-btn btn-primary" id="testListAction">开始上传</button>
+                    </div>
+                    <hr>
+                    <button class="layui-btn layui-btn-danger" id="clear">清空图片</button>
+
+                    
+                    <span class="f-r">共有数据：<strong>{$count}</strong> 条</span>
+                </div>
+                <div class="mt-20 clearfix">
+                    <table class="table table-border table-bordered table-bg table-hover table-sort">
+                        <thead>
+                            <tr class="text-c">
+                                <th>ID</th>
+                                <th>图片</th>
+                                <th>图片序</th>
+                                <th>创建时间</th>
+                                <th>更新时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {volist name="photos" id="vo"}
+                            <tr class="text-c">
+                                <td>{$vo.id}</td>
+                                <td>
+                                    <img width="45px" height="auto" class="picture-thumb selectImg"
+                                        data-original="{$vo.img_url}" src="/static/images/loading02.gif"
+                                        onclick="previewImg(this)">
+                                </td>
+                                <td class="order">
+                                    <!-- <span id="show{$vo.id}" class="show">{$vo.pic_order}</span>
+                              <input type="text" id='{$vo.id}' class="edit" value="{$vo.pic_order}" onblur="change('{$vo.id}')"> -->
+                                    <div onclick="showInp('{$vo.id}', '{$vo.pic_order}')"
+                                        style="display: flex;justify-content: space-between;cursor: pointer;">
+                                        <span id="showNum{$vo.id}" class="show">{$vo.pic_order}</span>
+                                        <i id="showI{$vo.id}" class="Hui-iconfont">&#xe6df;</i>
+                                    </div>
+                                    <input type="text" id='{$vo.id}' class="edit" value="{$vo.pic_order}"
+                                        onblur="change('{$vo.id}')">
+
+                                </td>
+                                <td>{$vo.create_time|date='Y-m-d'}</td>
+                                <td>{$vo.update_time|date='Y-m-d'}</td>
+                                <td class="f-14 td-manage">
+                                    <a style="text-decoration:none" class="ml-5"
+                                        onClick="editCreate('图片编辑','edit?id={$vo.id}&book_id={$book_id}&chapter_id={$chapter_id}')">
+                                        <i class="Hui-iconfont">&#xe6df;</i>
+                                    </a>
+                                    <a style="text-decoration:none" class="ml-5" onclick="del(this,{$vo.id})"
+                                        href="javascript:;" title="删除">
+                                        <i class="Hui-iconfont">&#xe6e2;</i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {/volist}
+                        </tbody>
+                    </table>
+                    {$photos|raw}
+                </div>
+            </div>
+        </div>
+    </article>
+</section>
+{/block}
+{block name="script"}
+
+<script>
+    function previewImg(obj) {
+        var img = new Image();
+        img.src = obj.src;
+        var height = img.height; // 原图片大小
+        var width = img.width; //原图片大小
+        var winHeight = $(window).height() - 80; // 浏览器可视部分高度
+        var winWidth = $(window).width() - 100; // 浏览器可视部分宽度
+
+        // 如果图片高度或者宽度大于限定的高度或者宽度则进行等比例尺寸压缩
+        if (height >= winHeight || width >= winWidth) {
+            // 1.原图片宽高比例 大于等于 图片框宽高比例
+            if (winWidth / winHeight <= width / height) {
+                width = winWidth; //以框的宽度为标准
+                height = winWidth * (height / width);
+            }
+
+            // 2.原图片宽高比例 小于 图片框宽高比例
+            if (winWidth / winHeight > width / height) {
+                width = winHeight * (width / height);
+                height = winHeight; //以框的高度为标准
+            }
+        }
+
+        var imgHtml = "<img src='" + img.src + "' width='" + width + "px' height='" + height + "px'>";
+        //弹出层
+        layer.open({
+            type: 1,
+            shade: 0.8,
+            offset: 'auto',
+            // area: [500 + 'px',550+'px'],
+            area: [width + 'px', (height + 50) + 'px'], //原图显示,高度+50是为了去除掉滚动条
+            shadeClose: true,
+            scrollbar: false,
+            title: "图片预览", //不显示标题  
+            content: imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响  
+            cancel: function () {
+                //layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });  
+            }
+        });
+    }
+    var oldOrder;
+
+    function showInp(id, order) {
+        oldOrder = order
+        $('#' + id).css('display', 'block')
+        $('#' + id).select()
+        $('#showNum' + id).css('display', 'none')
+        $('#showI' + id).css('display', 'none')
+    }
+
+    function change(id) {
+        const order = $('#' + id).val()
+        const data = {
+            "id": id,
+            "sort": order
+        }
+        if (oldOrder != order) {
+            $.ajax({
+                type: 'POST',
+                url: "{:url('editSort')}",
+                data: data,
+                dataType: 'json',
+                success: function (data) {
+                    if (data.err == 0) { //删除成功
+                        $('#showNum' + id).text(order)
+                        layer.msg(data.msg, {
+                            icon: 1,
+                            time: 1000
+                        }, function () {
+                            // clearCache();
+                            // location.reload();
+                        });
+                    } else {
+                        $('#' + id).val('')
+                        layer.msg(data.msg, {
+                            icon: 2
+                        }, function () {
+                            // location.reload();
+                        });
+                    }
+
+                },
+                error: function (data) {
+                    layer.msg(data);
+                },
+            });
+        }
+        $('#' + id).css('display', 'none')
+        $('#showNum' + id).css('display', 'block')
+        $('#showI' + id).css('display', 'block')
+
+    }
+    
+    var appending = false
+    // 多图上传 修改版 start 
+    var progress = 0;
+    var isAllDone = false;
+    layui.use('upload', function () {
+        var $ = layui.jquery,
+            upload = layui.upload;
+        var successNum = 0;
+        var failNum = 0;
+        var fileNum = 0;
+        //多图片上传
+        //多文件列表示例
+        var demoListView = $('#demoList'),
+            uploadListIns = upload.render({
+                elem: '#testList',
+                url: "{:url('upload')}" //改成您自己的上传接口
+                    ,
+                accept: 'images',
+                multiple: true,
+                auto: false,
+                bindAction: '#testListAction',
+                shade: 0.8,
+                size: 0,
+                before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                    this.data = {
+                        chapter_id: "{$chapter_id}",
+                        book_id: "{$book_id}"
+                    };
+
+                    if (appending) {
+                        return false
+                    } 
+                    confirmMsg()
+                    appending = true
+                    if(isAllDone) {
+                        layer.msg("上传完毕,请点击右上角刷新按钮", {time: 3000});
+                        return false;
+                    } else {
+                        // console.log('confirmMsg')
+                        // confirmMsg()
+                    }
+                },
+                choose: function (obj) {
+                    demoListView.html('');
+                    fileNum = Object.getOwnPropertyNames(obj.pushFile()).length
+                    var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+                    var tb = document.getElementById('demoList');
+                    var rowNum=tb.rows.length;
+            	
+                    obj.mpreview(function (index, file, result) {
+                        var tr = $(['<tr id="upload-' + index + '">', '<td>' + file.name +
+                            '</td>', '<td>' + (file.size / 1024).toFixed(1) + 'kb</td>',
+                            '<td>等待上传</td>', '<td>',
+                            '<button onclick="confirmMsg()" class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>',
+                            '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>',
+                            '</td>', '</tr>'
+                        ].join(''));
+
+                        //单个重传
+                        tr.find('.demo-reload').on('click', function () {
+                            obj.upload(index, file);
+                        });
+
+                        //删除
+                        tr.find('.demo-delete').on('click', function () {
+                            delete files[index]; //删除对应的文件
+                            tr.remove();
+                            uploadListIns.config.elem.next()[0].value =
+                            ''; //清空 input file 值，以免删除后出现同名文件不可选
+                        });
+
+                        demoListView.append(tr);
+                    });
+                },
+                done: function (res, index, upload) {
+                    var tr = demoListView.find('tr#upload-' + index);
+                    var tds = tr.children();
+                    // console.log('demoListView', demoListView)
+                    // console.log('tr', tr)
+                    // console.log('tds', tds)
+                    if (res.err == 0) { //上传成功
+                        // console.log('成功')
+                        tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+                        successNum++
+                        // tds.eq(3).html(''); //清空操作
+                        // console.log('this.files', Object.keys(this.files).length)
+                        delete this.files[index]; //删除文件队列已经上传成功的文件
+
+                    } else {
+                        // console.log('失败')
+                        tds.eq(2).html('<span style="color: #FF0000;">上传失败</span>');
+                        tds.eq(3).find('.demo-reload').removeClass('layui-hide');
+                        failNum++
+                        tds.eq(2).html(`<span style="color: #FF0000;">上传失败,${res.msg}</span>`);
+                    }
+                    progress = ((successNum + failNum) / fileNum * 100).toFixed(2)
+                    $('#imgDialog').text(
+                        `共${fileNum}张,上传成功${successNum}张,当前进度${progress} %`)
+                    // delete this.files[index]; //删除文件队列已经上传成功的文件
+                    if (progress >= 100) {
+                        var css = {
+                            borderColor: "#1E9FFF",
+                            backgroundColor: "#1E9FFF",
+                            color: "#fff"
+                        };
+                        $('.layui-layer-btn0').css(css);
+                        isAllDone = true
+                    }
+
+                },
+                allDone: function (obj) { //当文件全部被提交后，才触发
+                    // progress = ((obj.successful + obj.aborted) / obj.total * 100).toFixed(2)
+                    progress = ((successNum + failNum) / fileNum * 100).toFixed(2)
+
+                    $('#imgDialog').text(
+                        // `共${obj.total}张,上传成功${obj.successful}张,失败${obj.aborted}张,当前进度${progress}%`)
+                        `共${fileNum}张,上传成功${successNum}张,当前进度${progress} %`)
+                    // if (progress >= 100) {
+                        var css = {
+                            borderColor: "#1E9FFF",
+                            backgroundColor: "#1E9FFF",
+                            color: "#fff"
+                        };
+                        $('.layui-layer-btn0').css(css);
+                        isAllDone = true
+                    // }
+                    // layer.msg("上传文件数量：【"+ obj.total + "】张，上传成功：【"+ obj.successful + "】张，失败：【"+ obj.aborted + "】", {time: 3000});
+                    // console.log(obj.total); //得到总文件数
+                    // console.log(obj.successful); //请求成功的文件数
+                    // console.log(obj.aborted); //请求失败的文件数
+                },
+                
+                error: function (index, upload) {
+                    // console.log('index', index)
+                    var tr = demoListView.find('tr#upload-' + index),
+                        tds = tr.children();
+                    tds.eq(2).html('<span style="color: #FF0000;">上传失败</span>');
+                    tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+                    // delete this.files[index]; //删除文件队列已经上传成功的文件
+                }
+            });
+    })
+
+    function confirmMsg() {
+            layer.open({
+            type: 1,
+            title: false //不显示标题栏
+                ,
+            closeBtn: false,
+            area: '300px;',
+            shade: 0.8,
+            id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                ,
+            // btn: ['上传完毕', '取消上传'],
+            btn: ['上传完毕', '取消上传'],
+            btnAlign: 'c',
+            moveType: 1 //拖拽模式，0或者1
+                ,
+            yes: function (index, layero) {
+                //按钮【按钮一】的回调
+                if (isAllDone) {
+                    window.location.reload(true);
+                } else {
+                    layer.msg("正在上传中", {
+                        time: 3000
+                    });
+                }
+
+            },
+            btn2: function (index, layero) {
+                window.location.reload(true);
+                // if (progress < 100) {
+                //     $.xhrPool.abortAll()
+                // }
+                //return false 开启该代码可禁止点击该按钮关闭
+            },
+            content: '<div Id="imgDialog" style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">图片正在上传,请稍候</div>',
+            success: function (layero) {}
+
+        });
+    }
+
+    $.xhrPool = [];
+    $.xhrPool.abortAll = function () {
+        console.log('abortAllAjax')
+        $(this).each(function (idx, jqXHR) {
+            jqXHR.abort();
+        });
+        $.xhrPool = [];
+    };
+
+    $.ajaxSetup({
+        beforeSend: function (jqXHR) {
+            $.xhrPool.push(jqXHR);
+        },
+        complete: function (jqXHR) {
+            var index = $.xhrPool.indexOf(jqXHR);
+            if (index > -1) {
+                $.xhrPool.splice(index, 1);
+            }
+        }
+    });
+    // 多图上传 修改版 end 
+</script>
+<script>
+    $('#clear').click(function () {
+        if (confirm('确定清空?')) {
+            $.ajax({
+                url: "{:url('clear',['chapter_id' => $chapter_id])}",
+                type: 'post',
+                success(res) {
+                    layer.msg(res.msg, {
+                        icon: 1,
+                        time: 1000
+                    });
+                    location.reload();
+                },
+                error(data) {
+                    layer.msg(data, {
+                        icon: 2,
+                        time: 1000
+                    });
+                }
+            })
+        }
+    })
+</script>
+{/block}

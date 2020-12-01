@@ -1,0 +1,164 @@
+{extend name="pub/base" /}
+{block name="title"}
+<title>分类管理</title>
+
+{/block}
+<style>
+    .order{
+        width: 140px;
+    }
+    /* .order:hover>.show{
+        display: none;
+    }
+    .order:hover>.edit{
+        display: block;
+    } */
+    .edit{
+        display: none;
+        width: 100%;
+        padding: 5px 0;
+    }
+    .Hui-iconfont{
+        cursor: pointer;
+    }
+</style>
+{block name="body"}
+<section class="Hui-admin-article">
+    <nav class="breadcrumb" style="background-color:#fff;padding: 0 24px"><i class="Hui-iconfont">&#xe67f;</i> 首页
+        <span class="c-gray en">&gt;</span>
+        题材管理
+        <span class="c-gray en">&gt;</span>
+        题材列表
+        <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px"
+           href="javascript:location.replace(location.href);" title="刷新"><i class="Hui-iconfont">&#xe68f;</i></a>
+    </nav>
+    <article class="Hui-admin-content clearfix">
+
+        <div class="panel mt-20">
+            <div class="panel-body">
+                <div class="clearfix">
+							<span class="f-l">
+                                <a class="btn btn-primary radius" onclick="editCreate('题材新增','{:url(\'create\')}')">
+                                    <i class="Hui-iconfont">&#xe600;</i> 添加题材
+                                </a>
+							</span>
+                    <span class="f-r">共有数据：<strong>{$count}</strong> 条</span>
+                </div>
+                <div class="mt-20 clearfix">
+                    <table class="table table-border table-bordered table-bg table-hover table-sort">
+                        <thead>
+                        <tr class="text-c">
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>创建时间</th>
+                            <th>修改时间</th>
+                            <th>首页展示</th>
+                            <th>排序</th>
+                            <th>缩略图</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="tags" id="vo"}
+                        <tr class="text-c">
+                            <td width="80px">{$vo.id}</td>
+                            <td width="200px">{$vo.tag_name}</td>
+                            <td width="200px">{$vo.create_time|date='Y-m-d H:i'}</td>
+                            <td width="200px">{$vo.update_time|date='Y-m-d H:i'}</td>
+                            <td width="100px">
+                                {if $vo.is_show == 1}
+                                展示中
+                                {else /}
+                                已隐藏
+                                {/if}
+                            </td>
+
+                            <td width="200px" class="order">
+                                <div onclick="showInp('{$vo.id}', '{$vo.chapter_order}')" style="display: flex;justify-content: space-between;cursor: pointer;">
+                                    <span id="showNum{$vo.id}" class="show">{$vo.sort}</span>
+                                    <i id="showI{$vo.id}" class="Hui-iconfont">&#xe6df;</i>
+                                </div>
+                                <input type="text" id='{$vo.id}' class="edit" value="{$vo.chapter_order}" onblur="change('{$vo.id}')" style="display: none;width: 100%;padding: 5px 0;">
+                            </td>
+
+                            <td>
+                                <img style="max-width: 400px;height: 100px;" class="picture-thumb selectImg" data-original="{$vo.cover_url}" src="/static/images/loading02.gif">
+                            </td>
+                            <td width="200px" class="f-14 td-manage">
+                                <a style="text-decoration:none" class="ml-5"  onclick="editCreate('题材编辑','{:url(\'tag/edit\',[\'id\' => $vo.id])}')">
+                                    <i class="Hui-iconfont">&#xe6df;</i>
+                                </a>
+                                <a style="text-decoration:none" class="ml-5" onclick="del(this,{$vo.id})" href="javascript:;"><i class="Hui-iconfont">&#xe6e2;</i></a>
+                                {if $vo.is_show == 1}
+                                <a style="text-decoration:none" onClick="member_stop('{$vo.id}')"
+                                   href="javascript:;" title="不显示"><i class="Hui-iconfont">&#xe631;</i></a>
+                                {else /}
+                                <a style="text-decoration:none" onClick="member_start('{$vo.id}')"
+                                   href="javascript:;" title="显示"><i class="Hui-iconfont">&#xe631;</i></a>
+                                {/if}
+
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                    {$tags|raw}
+                </div>
+            </div>
+        </div>
+    </article>
+
+</section>
+<script>
+    var oldOrder;
+    function showInp(id, order) {
+        oldOrder = order
+        $('#' + id).css('display','block')
+        $('#' + id).select()
+        $('#showNum' + id).css('display','none')
+        $('#showI' + id).css('display','none')
+    }
+    function change(id) {
+        const order = $('#' + id).val()
+        const data ={"id":id,"sort":order}
+        if(oldOrder != order) {
+            $.ajax({
+                type: 'POST',
+                url: "{:url('editSort')}",
+                data: data,
+                dataType: 'json',
+                success: function (data) {
+                    if (data.err == 0) { 
+                        $('#showNum' + id).text(order)
+                        layer.msg(data.msg, {icon: 1, time: 1000}, function () {
+                            // clearCache();
+                            // location.reload();
+                        });
+                    } else {
+                        $('#' + id).val('')
+                        layer.msg(data.msg, {icon: 2}, function () {
+                            // location.reload();
+                        });
+                    }
+                   
+                },
+                error: function (data) {
+                    layer.msg(data);
+                },
+            });
+        }
+        $('#' + id).css('display','none')
+        $('#showNum' + id).css('display','block')
+        $('#showI' + id).css('display','block')
+        
+    }
+    $('#cbx').click(function () {
+        var cbxs = $('.cbx');
+        var flag = $('#cbx').prop("checked");
+        $.each(cbxs, function (index, value) {
+            $(value).prop("checked", flag);
+        })
+    })
+   
+</script>
+{/block}

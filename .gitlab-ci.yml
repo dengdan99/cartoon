@@ -1,0 +1,16 @@
+stages:
+  - update
+
+update:
+  stage: update
+  only:
+  - master
+  tags:
+  - kkvideo
+  script:
+  - cd /data/cartoon
+  - git fetch --all
+  - git reset --hard origin/master
+  - git pull
+  - cd config/ && chmod 777 payment.php page.php site.php
+

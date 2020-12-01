@@ -1,0 +1,62 @@
+{extend name="./template/default/m/pub/base.html" /}
+{block name="seo"}
+<title>vip-{$site_name}</title>
+{/block}
+{block name="content"}
+{include file="./template/default/m/pub/top3.html" /}
+<div style="position: fixed;top: 46px;width: 100%">
+    <div class="title-1" >VIP套餐<a href="/promotion" class="title-1-right">推广赢VIP</a></div>
+    <ul class="recharge-set">
+        {foreach $vips as $key=>$vo}
+        <li data-val="{$vo.month}" data-key="{$key}">
+            <div class="recharge-set-info">
+                <p class="recharge-set-title">{$vo.month}个月VIP</p>
+                <p class="recharge-set-tip">每月{:config('extra_config.money_unit_text')}{:floor($vo.price/$vo.month)}</p>
+            </div>
+            <span class="recharge-set-right"> {:config('extra_config.money_unit_text')}{$vo.price} </span>
+        </li>
+        {/foreach}
+    </ul>
+    <form id="vipForm">
+        <input type="hidden" name="month" id="month" value="">
+        <input type="hidden" name="key" id="key" value="">
+    </form>
+    <a class="recharge-fix-btn" href="javascript:void(0);" onclick="formSub();">确认兑换</a>
+    <div class="toast" style="display:none;"></div>
+</div>
+
+<script>
+    $('.recharge-set li').click(function () {
+        $(this).addClass('active').siblings().removeClass('active');
+        $('#month').val($(this).attr('data-val'));
+        $('#key').val($(this).attr('data-key'));
+    })
+
+    function formSub() {
+        var month = $('#month').val();
+        var key = $('#key').val();
+        if (month == '' || key == '') {
+            ShowDialog('请选择一个选项');
+        } else {
+            $.ajax({
+                method: 'post',
+                url: '/vip',
+                data: {month: month,key:key},
+                success: function (res) {
+                    ShowDialog(res.msg);
+                    if (res.err == 0) {
+                        setTimeout(function () {
+                            location.href = '/ucenter';
+                        }, 1000);
+                    } else if (res.err == 1) {
+                        setTimeout(function () {
+                            location.href = '/charge';
+                        }, 1000);
+                    }
+                }
+            })
+        }
+
+    }
+</script>
+{/block}

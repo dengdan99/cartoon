@@ -1,0 +1,247 @@
+{extend name="./template/default/m/pub/baseVue.html" /}
+{block name="seo"}
+<title>漫画分类-{$site_name}</title>
+{php}$tpl='booklist';{/php}
+{/block}
+{block name="content"}
+{include file="./template/default/m/pub/top2.html" /}
+<style>
+.manga-list-2-title{line-height: 16px;font-size: 14px;color: #252525;letter-spacing: 0;padding-left: 10px;display: -webkit-box;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    min-height: 32px;
+    overflow: hidden;margin-top: 2px;font-weight: bold;}
+.manga-list-2-tip{line-height: 16px;font-size: 13px;color: #FD113A;letter-spacing: 0;padding-left: 10px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;margin-top: 2px;padding-bottom: 10px;}
+.loading{
+    padding-top: 10px;
+    text-align: center;
+    color: #aaa;
+}
+</style>
+<div id="app">
+    <div class="manga-list-bar" id="end">
+        <a href="javascript:void(0)" class="manga-list-bar-item" @click="setEnd(-1)" :class="{'active': end==-1}">全部</a>
+        <a href="javascript:void(0)" class="manga-list-bar-item" @click="setEnd(2)" :class="{'active': end==2}">连载中</a>
+        <a href="javascript:void(0)" class="manga-list-bar-item" @click="setEnd(1)" :class="{'active': end==1}">已完结</a>
+        <a class="manga-list-bar-right" id="manga-list-bar-right">{{ catTitle }}</a>
+        <div class="manga-list-bar-right-down" ref="dropDown" id="manga-list-bar-right-down" style="display:none;overflow-y: scroll;">
+            <a class="manga-list-bar-right-down-item" @click="setTag('全部')" :class="{'active':tags_id=='全部'}">全部</a>
+            <div v-for="(item, index) in tags" :key="index">
+                <a class="manga-list-bar-right-down-item" @click="setTag(item.id,item.tag_name)" :class="{'active':tags_id==item.id}">{{item.tag_name}}</a>
+            </div>
+        </div>
+    </div>
+    <div class="manga-list" style="border:none;background-color:#f8f8f8;padding-top: 87px;">
+        <ul class="manga-list-2" >
+            <li v-for="(item, index) in books" :key="index">
+                <div class="manga-list-2-cover">
+                    <a :href="'/{$book_ctrl}/'+ item.param" :title="item.book_name">
+                        <!-- <img class="manga-list-2-cover-img selectImg"  :data-original="item.cover_url" src="/static/images/loading02.gif"> -->
+                        <img class="manga-list-2-cover-img"  v-if="item.done":src="item.cover_url" :alt="item.book_name">
+                        <img class="manga-list-2-cover-img" v-else src="/static/images/loading02.gif" :alt="item.book_name">
+                        
+                    </a>
+                </div>
+                <p class="manga-list-2-title">
+                    <a :href="'/{$book_ctrl}/'+ item.param" :title="item.book_name">{{item.book_name}}</a>
+                </p>
+            </li>
+        </ul>
+    </div>
+    <div v-show="isLoading" class="loading">努力加载中...</div>
+    <div v-if="isLoadOver" class="loading">没有更多漫画了哦~</div>
+</div>
+<div class="toast" style="display:none;"></div>
+{include file="./template/default/m/pub/tabs.html" /}
+
+<script>
+    $(function () {
+        $("#manga-list-bar-right").click(function () {
+            if ($("#manga-list-bar-right-down").is(":hidden")) {
+                $("#manga-list-bar-right-down").show();
+            }
+            else {
+                $("#manga-list-bar-right-down").hide();
+            }
+        });
+    });
+    // var _this = this;
+    var app = new Vue({
+        el: '#app',
+        data: {
+            books: [],
+            tags: [],
+            tags_id: '{$tags_id}',
+            end: -1,
+            page: 0,
+            isMore: 1,
+            reg: /.txt$/,
+            appendAjax: [],
+            catTitle: '全部',
+            tag: '{$tag}',
+            isLoading: false,
+            isLoadOver: false,
+        },
+        methods: {
+            getBooks: function(isRefresh) {
+                var _this = this;
+                _this.isLoading = true;
+                $.ajax({
+                    url: "/getBooks",
+                    dataType: 'json',
+                    data: { 
+                        tags_id: _this.tags_id,
+                        tag:  _this.tag,
+                        end: _this.end,
+                        page: _this.page
+                    },
+                    success: function(response) {
+                        if (response.err == 0) {
+                            _this.isMore = 1
+                            resData = response.books
+                            resData = resData.map(function(item) {
+                                item.done = false
+                                return item
+                             })
+                            if (isRefresh == 1) {
+                                _this.books = resData
+                            } else {
+                                _this.books = _this.books.concat(resData)
+                            }
+                            _this.isLoading = false;
+                            _this.fetchImage();
+                        } else {
+                            _this.isMore = 0;
+                            _this.isLoading = false;
+                            _this.isLoadOver = true;
+                            // ShowDialog('没有更多了');
+                            if(_this.page == 0) {
+                                _this.books = [];
+                            }
+                        }
+                    }
+                })
+
+                // axios.get("/getBooks", {
+                //     params: {
+                //         tags_id: _this.tags_id,
+                //         end: _this.end,
+                //         page: _this.page
+                //     }
+                // }).then(function(response) {
+                //     if (response.data.err == 0) {
+                //         _this.isMore = 1
+                //         resData = response.data.books
+                //         resData = resData.map(function(item) {
+                //             item.done = false
+                //             return item
+                //         })
+                //         if (isRefresh == 1) {
+                //             _this.books = resData
+                //         } else {
+                //             _this.books = _this.books.concat(resData)
+                //         }
+                //         _this.fetchImage();
+                //     } else {
+                //         _this.isMore = 0
+                //         ShowDialog('没有更多了')
+                //     }
+                // })
+            },
+            fetchImage: function() {
+                var _this = this;
+                _this.books.forEach(function(book) {
+                    if  (_this.reg.test(book.cover_url)) {
+                        var ajaxHandler = _this.loadingBase64(book.cover_url, function(base64Data) {
+                            book.cover_url = base64Data
+                            book.done = true
+                        })
+                        _this.appendAjax.push(ajaxHandler)
+                    } else {
+                        book.done = true
+                    }
+                })
+            },
+            loadingBase64: function(url, cb) {
+                return $.ajax({
+                    url: url,
+                    dataType: 'text',
+                    success: function(data, status) {
+                        cb(data)
+                    },
+                    error: function(err) {
+                        console.warn('获取资源失败：' + url)
+                    }
+                })
+            },
+            setTag: function(tags_id, tag_name) {
+                this.tag = ''
+                if(tag_name){
+                    this.catTitle = tag_name
+                } else {
+                    this.catTitle = '全部'
+                }
+                this.$refs.dropDown.style.display = 'none'
+                this.tags_id = tags_id
+                this.page = 0
+                this.isMore = 1
+                this.getBooks(1)
+                this.ajaxAbort()
+            },
+            setEnd: function(end) {
+                // this.tag = ''
+                // this.catTitle = '分类'
+                this.end = end
+                this.page = 0
+                this.isMore = 1
+                // this.tags_id = '全部'
+                this.getBooks(1)
+                this.ajaxAbort()
+            },
+            ajaxAbort: function() {
+                this.appendAjax.forEach(function(v) {
+                    v.abort()
+                })
+                this.appendAjax = []
+            },
+            onScroll: function() {
+                var _this = this;
+                //可滚动容器的高度
+                var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                //变量windowHeight是可视区的高度
+                var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
+                //变量scrollHeight是滚动条的总高度
+                var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+                //滚动条到底部的条件
+                if (scrollTop + windowHeight == scrollHeight) {
+                    if (_this.isMore == 1) { //如果还有更多数据，再请求接口，否则不再请求，节省服务器资源
+                        _this.page = this.page + 15;
+                        _this.getBooks(0);                     
+                    }
+                }
+            }
+        },
+        mounted: function() {
+            var _this = this;
+            const tags_id = '{$tags_id}';
+            console.log(tags_id)
+            axios.get("/getOptions").then(function(response) {
+                _this.tags = response.data.tags;
+                _this.tags.forEach(function(v) {
+                    if(v.id == tags_id) {
+                        _this.catTitle = v.tag_name;
+                        return
+                    } 
+                })
+            })
+        },
+        created: function() {
+            this.getBooks(1);
+            window.addEventListener('scroll', this.onScroll);
+        }
+    })
+</script>
+
+{include file="./template/default/m/pub/return_top.html"}
+{/block}

@@ -1,0 +1,338 @@
+{extend name="pub/base" /}
+{block name="title"}
+<title>漫画管理</title>
+{/block}
+{block name="body"}
+<section class="Hui-admin-article">
+    <nav class="breadcrumb" style="background-color:#fff;padding: 0 24px"><i class="Hui-iconfont">&#xe67f;</i> 首页
+        <span class="c-gray en">&gt;</span>
+        漫画管理
+        <span class="c-gray en">&gt;</span>
+        漫画列表
+        <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px"
+           href="javascript:location.replace(location.href);" title="刷新"><i class="Hui-iconfont">&#xe68f;</i></a>
+    </nav>
+    <article class="Hui-admin-content clearfix">
+        <div class="panel">
+            <div class="panel-body">
+                <div class="text-c">
+                    <input type="text" placeholder=" 漫画名称" style="width:250px" id="searchParam" class="input-text">
+                    <button type="submit" class="btn btn-success" onclick="search()"><i
+                            class="Hui-iconfont">&#xe665;</i> 查询
+                    </button>
+                </div>
+                <script>
+                    function search() {
+                        var param = $('#searchParam').val();
+                        location.href = "search?book_name=" + param + "&status=1";
+                    }
+                </script>
+            </div>
+        </div>
+
+        <div class="panel mt-20">
+            <div class="panel-body">
+                <div class="clearfix">
+							<span class="f-l">
+                                <a href="javascript:;" onclick="offBatch()" class="btn btn-danger radius"><i
+                                        class="Hui-iconfont">&#xe6e2;</i> 批量下架</a>
+                                <a class="btn btn-primary radius" onclick="editCreate('漫画新增','{:url(\'create\')}')">
+                                    <i class="Hui-iconfont">&#xe600;</i> 添加漫画</a>
+                                <a class="btn btn-success radius" onclick="editCreate('付费批量设置','{:url(\'payment\')}')">付费批量设置</a>
+                                <button type="button" class="btn layui-btn-normal"
+                                        onclick="checkAllClickNum()">批量初始化点击量</button>
+							</span>
+                    <span class="f-r">共有数据：<strong>{$count}</strong> 条</span>
+                </div>
+                <div class="mt-20 clearfix">
+                    <table class="table table-border table-bordered table-bg table-hover table-sort">
+                        <thead>
+                        <tr class="text-c">
+                            <th>ID</th>
+                            <th>漫画名</th>
+                            <th>点击量</th>
+                            <th>封面</th>
+                            <th>章节数</th>
+                            <th>题材</th>
+                            <th>标签</th>
+                            <th>地区</th>
+                            <th>更新时间</th>
+                            <th>起始付费章节</th>
+                            <th>章节价格</th>
+                            <th>是否完结</th>
+                            <th>是否推荐</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {volist name="books" id="vo"}
+                        <tr class="text-c">
+                            <td>{$vo.id}</td>
+                            <td width="15%">{$vo.book_name}</td>
+                            <td width="10%">{$vo.clicks}</td>
+                            <td>
+                                <img width="45px;" height="auto" style="cursor: pointer;"
+                                     class="picture-thumb selectImg" data-original="{$vo.cover_url}"
+                                     src="/static/images/loading02.gif" onclick="previewImg(this)">
+                            </td>
+                            <td>
+                                {$vo.chapter_count}
+                            </td>
+                            <td>{$vo.tag.tag_name}</td>
+                            <td>{$vo.tags}</td>
+                            <td>{$vo.area.area_name}</td>
+                            <td>{$vo.last_time|date='Y-m-d'}</td>
+                            <td width="40px">{$vo.start_pay}</td>
+                            <td width="40px">{$vo.money}</td>
+                            <td>{$vo.end == 1 ? "完结":"连载中"}</td>
+                            <td width="40px">{$vo.is_top == 1 ? "是":"否"}</td>
+                            <td class="f-14 td-manage">
+                                <a onclick="editCreate('章节管理','{:url(\'chapters/index\',[\'book_id\' => $vo.id])}')"
+                                   class="btn radius btn-success size-S">章节管理</a>
+                                <a style="text-decoration:none" class="ml-5"
+                                   onclick="editCreate('漫画编辑','{:url(\'books/edit\',[\'id\' => $vo.id])}')">
+                                    <i class="Hui-iconfont" title="编辑漫画">&#xe6df;</i>
+                                </a>
+                                <a style="text-decoration:none" onClick="member_stop('{$vo.id}')"
+                                   href="javascript:;" title="下架"><i class="Hui-iconfont">&#xe631;</i></a>
+                                <a style="text-decoration:none"
+                                   onClick="editCreate('漫画初始化点击量', '{:url(\'books/editClick\',[\'id\' => $vo.id])}' )"
+                                   href="javascript:;" title="点击量"><i class="Hui-iconfont">&#xe697;</i></a>
+                                <!-- <a style="text-decoration:none" class="ml-5" onclick="del(this,{$vo.id})"
+                                   href="javascript:;" title="删除"><i class="Hui-iconfont">&#xe6e2;</i></a> -->
+                            </td>
+                        </tr>
+                        {/volist}
+                        </tbody>
+                    </table>
+                    {$books|raw}
+                </div>
+            </div>
+        </div>
+    </article>
+</section>
+
+<script>
+
+    var regNum = /^\d+$/;
+    // 跳转页面
+    $('.pageRemark').after('<div class="jump-box" style="display: flex;align-items: center;"><input type="text" style="width: 50px;margin-right: 10px;height: 30px;" class="layui-input"><button class="layui-btn layui-btn-sm" onclick="jump()">跳转</button></div>');
+
+    function jump() {
+        var num = ($('.layui-input').val()).trim();
+        if (!regNum.test(num)) {
+            layer.msg('请输入合法的页码');
+            return
+        }
+        var url = "{:url('books/index')}?page=" + num;
+        console.log(url)
+        window.location.href = url
+    }
+
+    // 批量下架
+    function offBatch() {
+        layer.open({
+            type: 1
+            ,
+            title: false //不显示标题栏
+            ,
+            closeBtn: false
+            ,
+            area: '330px;'
+            ,
+            shade: 0.8
+            ,
+            id: 'LAY_layuipro' //设定一个id，防止重复弹出
+            ,
+            btn: ['下架', '取消']
+            ,
+            btnAlign: 'c'
+            ,
+            moveType: 1 //拖拽模式，0或者1
+            ,
+            content: '<div style="padding: 30px;  background-color: #393D49; color: #fff; display: flex;flex-direction: column;">' +
+                '<div style="margin: 5px 0;display: flex;align-items: center;"><span>起始漫画ID: </span><input id="startIdOff" style="padding: 3px;margin: 0 5px;" value="' + name + '" /></div>' +
+                '<div style="margin: 5px 0;display: flex;align-items: center;"><span>结束漫画ID: </span><input id="endIdOff" style="padding: 3px;margin: 0 5px;" value="' + name + '" /></div>' +
+
+                '</div>'
+            ,
+            yes: function () {
+                var startId = ($('#startIdOff').val()).trim();
+                var endId = ($('#endIdOff').val()).trim();
+                if (!regNum.test(startId)) {
+                    layer.msg('请输入合法的起始ID');
+                    return
+                }
+                if (!regNum.test(endId)) {
+                    layer.msg('请输入合法的结束ID');
+                    return
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: "{:url('setDownAll')}",
+                    data: {start_id: startId, end_id: endId},
+                    dataType: 'json',
+                    success: function (data) {
+                        subResHandle(data)
+                    },
+                    error: function (data) {
+                        layer.msg(data);
+                    },
+                });
+            }
+        });
+
+    }
+
+    // 预览封面
+    function previewImg(obj) {
+        var img = new Image();
+        img.src = obj.src;
+        var height = img.height; // 原图片大小
+        var width = img.width; //原图片大小
+        var winHeight = $(window).height() - 80; // 浏览器可视部分高度
+        var winWidth = $(window).width() - 100; // 浏览器可视部分宽度
+
+        // 如果图片高度或者宽度大于限定的高度或者宽度则进行等比例尺寸压缩
+        if (height >= winHeight || width >= winWidth) {
+            // 1.原图片宽高比例 大于等于 图片框宽高比例
+            if (winWidth / winHeight <= width / height) {
+                width = winWidth; //以框的宽度为标准
+                height = winWidth * (height / width);
+            }
+
+            // 2.原图片宽高比例 小于 图片框宽高比例
+            if (winWidth / winHeight > width / height) {
+                width = winHeight * (width / height);
+                height = winHeight; //以框的高度为标准
+            }
+        }
+
+        var imgHtml = "<img src='" + img.src + "' width='" + width + "px' height='" + height + "px'>";
+        //弹出层
+        layer.open({
+            type: 1,
+            shade: 0.8,
+            offset: 'auto',
+            // area: [500 + 'px',550+'px'],
+            area: [width + 'px', (height + 50) + 'px'], //原图显示,高度+50是为了去除掉滚动条
+            shadeClose: true,
+            scrollbar: false,
+            title: "图片预览", //不显示标题  
+            content: imgHtml, //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响  
+            cancel: function () {
+                //layer.msg('捕获就是从页面已经存在的元素上，包裹layer的结构', { time: 5000, icon: 6 });  
+            }
+        });
+    }
+
+    // 修改单个点击量
+    function checkClickNum(id, name) {
+        layer.open({
+            type: 1
+            ,
+            title: false //不显示标题栏
+            ,
+            closeBtn: false
+            ,
+            area: '330px;'
+            ,
+            shade: 0.8
+            ,
+            id: 'LAY_layuipro' //设定一个id，防止重复弹出
+            ,
+            btn: ['确认', '取消']
+            ,
+            btnAlign: 'c'
+            ,
+            moveType: 1 //拖拽模式，0或者1
+            ,
+            content: '<div style="padding: 30px;  background-color: #393D49; color: #fff; display: flex;flex-direction: column;">' +
+                '<div style="padding: 5px 0;">漫画名: ' + name + '</div>' +
+                '<div style="margin: 5px 0;display: flex;align-items: center;"><span>点击量: </span><input id="oneNum" style="padding: 5px 0;" value="' + name + '" /></div>' +
+                '</div>'
+            ,
+            yes: function () {
+                var num = $('#oneNum').val()
+                $.ajax({
+                    type: 'POST',
+                    url: "{:url('edit')}",
+                    data: {id: id, num: num},
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.err == 0) { //删除成功
+                            layer.msg(data.msg, {icon: 1, time: 1000}, function () {
+                                location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {icon: 2}, function () {
+                                location.reload();
+                            });
+                        }
+                    },
+                    error: function (data) {
+                        layer.msg(data);
+                    },
+                });
+            }
+        });
+
+    }
+
+    // 批量修改点击量
+    function checkAllClickNum() {
+        layer.open({
+            type: 1
+            ,
+            title: false //不显示标题栏
+            ,
+            closeBtn: false
+            ,
+            area: '330px;'
+            ,
+            shade: 0.8
+            ,
+            id: 'LAY_layuipro' //设定一个id，防止重复弹出
+            ,
+            btn: ['初始化', '取消']
+            ,
+            btnAlign: 'c'
+            ,
+            moveType: 1 //拖拽模式，0或者1
+            ,
+            content: '<div style="padding: 30px;  background-color: #393D49; color: #fff; display: flex;flex-direction: column;">' +
+                '<div style="margin: 5px 0;display: flex;align-items: center;"><span>起始漫画ID: </span><input id="startIdClick" style="padding: 3px;margin: 0 5px;" value="' + name + '" /></div>' +
+                '<div style="margin: 5px 0;display: flex;align-items: center;"><span>结束漫画ID: </span><input id="endIdClick" style="padding: 3px;margin: 0 5px;" value="' + name + '" /></div>' +
+
+                '</div>'
+            ,
+            yes: function () {
+                var startId = ($('#startIdClick').val()).trim();
+                var endId = ($('#endIdClick').val()).trim();
+                if (!regNum.test(startId)) {
+                    layer.msg('请输入合法的起始ID');
+                    return
+                }
+                if (!regNum.test(endId)) {
+                    layer.msg('请输入合法的结束ID');
+                    return
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: "{:url('setClickAll')}",
+                    data: {start_id: startId, end_id: endId},
+                    dataType: 'json',
+                    success: function (data) {
+                        subResHandle(data)
+                    },
+                    error: function (data) {
+                        layer.msg(data);
+                    },
+                });
+            }
+        });
+
+    }
+</script>
+
+{/block}

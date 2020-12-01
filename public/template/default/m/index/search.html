@@ -1,0 +1,203 @@
+{extend name="./template/default/m/pub/baseVue.html" /}
+{block name="seo"}
+<title>漫画搜索-{$site_name}</title>
+{/block}
+{block name="content"}
+<div id="app">
+    <div class="search-top">
+        <a href="javascript:history.back();">
+            <img class="search-top-back" src="/static/images/search-top-back.png">
+        </a>
+        <div class="search-top-input">
+            <input type="text" id="searchtxt" v-model="keyword" placeholder="请输入漫画名">
+        </div>
+        <a href="javascript:void(0);" @click="doSearch()" class="search-top-right">搜索</a>
+    </div>
+
+    <p class="search-title">热门搜索</p>
+
+    <div  class="search-label">
+        <span v-for="(item, index) in hot_search" :key="index" >
+            <a v-if="item"  href="javascript:void(0)" @click="setKeyword(item)"  class="search-label-item" >{{ item }}</a>
+        </span>
+        <!-- <a class="search-label-item" href="/{$search_ctrl}?keyword=斗破苍穹">斗破苍穹</a> -->
+    </div>
+
+    <ul class="book-list">
+        
+        <li v-for="(item, index) in books" :key="index">
+            <div class="book-list-cover">
+                <a :href="'/book/' + item.param"  :title="item.book_name">
+                    <img class="manga-list-2-cover-img"  v-if="item.done":src="item.cover_url" :alt="item.book_name">
+                    <img class="manga-list-2-cover-img" v-else src="/static/images/loading02.gif" :alt="item.book_name">
+                        
+                </a>
+            </div>
+            <div class="book-list-info">
+                <a :href="'/book/' + item.param">
+                    <p class="book-list-info-title">{{item.book_name}}</p>
+                    <p class="book-list-info-desc">{{item.summary}}...</p>
+                </a>
+                <p class="book-list-info-bottom">
+                    <a href="#" style="color:#666;">
+                        <span class="book-list-info-bottom-item">作者：{{item.author_name}}...</span>
+                    </a>
+                    
+                    <span v-i="item.end == 2" class='book-list-info-bottom-right-font'>连载中</span>
+                    <span v-else class='book-list-info-bottom-right-font active'>已完结</span>
+                   
+                </p>
+            </div>
+        </li>
+    </ul>
+    <div v-if="books.length == 0" style="color: #666;text-align: center;">
+        暂无相关漫画
+    </div>
+    <div v-show="isLoading" style="padding-top: 10px;text-align: center;color: #666;">努力加载中...</div>
+    <div v-if="!isMore && books.length !== 0" style="color: #666;text-align: center;padding: 10px 0">
+        没有更多漫画了哦~
+    </div>
+</div>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            hot_search: [],
+            books: [],
+            page: 1,
+            size: 5,
+            keyword: '',
+            isMore: 1,
+            reg: /.txt$/,
+            isLoading: false
+        },
+        methods: {
+            setKeyword: function(keyword) {
+                this.keyword = keyword
+                this.page = 1
+                this.getBooks(1)
+            },
+            doSearch: function() {
+                this.page = 1
+                this.isMore = 1
+                this.getBooks(1)
+            },
+             getBooks: function(isRefresh) {
+                var _this = this;
+                _this.isLoading = true;
+                $.ajax({
+                    url: "/getSearch",
+                    dataType: 'json',
+                    data: { 
+                        page: _this.page,
+                        size: _this.size,
+                        keyword: _this.keyword,
+                    },
+                    success: function(response) {
+                        if (response.err == 0 && response.books.length != 0) {
+                            _this.isMore = 1
+                            _this.hot_search = response.hot_search;
+                            resData = response.books
+                            resData.forEach(function(item) {
+                                item.done = false
+                            })
+                            console.log('resData', resData)
+                            if (isRefresh == 1) {
+                                _this.books = resData
+                            } else {
+                                // _this.books = _this.books.concat(resData)
+                                resData.forEach(function(item) {
+                                    _this.books.push(item)
+                                })
+                            }
+                            _this.isLoading = false;
+                            _this.fetchImage();
+                        } else {
+                            _this.isLoading = false;
+                            if(_this.page == 1) {
+                                _this.books = []
+                            }
+                            _this.isMore = 0
+                            // ShowDialog('没有更多了')
+                            
+                        }
+                    }
+                })
+
+                // axios.get("/getSearch", {
+                //     params: {
+                //         page: _this.page,
+                //         size: _this.size,
+                //         pagkeyworde: _this.keyword,
+                //     }
+                // }).then(function(response) {
+                //     if (response.data.err == 0 && response.data.books.length != 0) {
+                //         _this.isMore = 1
+                //         _this.hot_search = response.data.hot_search;
+                //         resData = response.data.books
+                //         resData = resData.map(function(item) {
+                //             item.done = false
+                //             return item
+                //         })
+                //         if (isRefresh == 1) {
+                //             _this.books = resData
+                //         } else {
+                //             _this.books = _this.books.concat(resData)
+                //         }
+                //         _this.fetchImage();
+                //     } else {
+                //         _this.isMore = 0
+                //         ShowDialog('没有更多了')
+                //     }
+                // })
+            },
+            fetchImage: function() {
+                var _this = this;
+                _this.books.forEach(function(book) {
+                    if  (_this.reg.test(book.cover_url)) {
+                        _this.loadingBase64(book.cover_url, function(base64Data) {
+                            book.cover_url = base64Data;
+                            book.done = true;
+                        })
+                    } else {
+                        book.done = true;
+                    }
+                })
+            },
+            loadingBase64: function(url, cb) {
+                $.ajax({
+                    url: url,
+                    dataType: 'text',
+                    success: function(data, status) {
+                        cb(data);
+                    },
+                    error: function(err) {
+                        console.warn('获取资源失败：' + url)
+                    }
+                })
+            },
+            onScroll: function() {
+                var _this = this;
+                //可滚动容器的高度
+                var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                //变量windowHeight是可视区的高度
+                var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
+                //变量scrollHeight是滚动条的总高度
+                var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+                //滚动条到底部的条件
+                if (scrollTop + windowHeight == scrollHeight) {
+                    if (_this.isMore == 1) { //如果还有更多数据，再请求接口，否则不再请求，节省服务器资源
+                        _this.page++;
+                        _this.getBooks(0);                  
+                    }
+                }
+            }
+        },
+        created: function() {
+            this.getBooks(1);
+            window.addEventListener('scroll', this.onScroll);
+        }
+    })
+</script>
+
+{/block}

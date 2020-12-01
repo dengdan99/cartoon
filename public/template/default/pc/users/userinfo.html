@@ -1,0 +1,78 @@
+{extend name="./template/default/pc/pub/base.html" /}
+{block name="seo"}
+<title>个人书架-{$site_name}</title>
+{/block}
+{block name="content"}
+<main class="container mt30 mb20 overflow-Show clearfix" style="min-height:750px;">
+    {include file="./template/default/pc/pub/uc_menu.html"}
+    <article class="article-main pull-right">
+        <section class="box-userinfo box ">
+            <div class="table-head">
+                <ul class="table-tabs">
+                    <li>
+                        <a class="active">编辑资料</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="box-body">
+                <form method="post" class="user-info-form mt20" novalidate="novalidate">
+                    <div>
+                        <label>登录名：</label>
+                        <span>
+                            <input id="username" type="text" value="">
+                        </span>
+                    </div>
+                    <div>
+                        <label>旧密码：</label>
+                        <span>
+                            <input id="old_password" type="password" value="">
+                        </span>
+                    </div>
+                    <div>
+                        <label>新密码</label>
+                        <span>
+                            <input id="password" type="password" value="">
+                        </span>
+                    </div>
+                    <div>
+                        <label>确认新密码</label>
+                        <span>
+                            <input id="password_confirm" type="password" value="">
+                        </span>
+                    </div>
+                    <div class="mt20 text-center">
+                        <button id="btnsave" class="save-btn btn" onclick="editInfo()" type="button">保存</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </article>
+</main>
+<!-- <script src="/static/js/userinfo.js"></script> -->
+<script>
+    function editInfo() {
+        var data = {
+            username: $('#username').val(),
+            old_password: $('#old_password').val(),
+            password: $('#password').val(),
+            password_confirm: $('#password_confirm').val()
+        }
+        $.ajax({
+            method: 'post',
+            url: '/userinfo',
+            data: data,
+            success:function (res) {
+                ShowDialog(res.msg);
+                if(res.err == 0) {
+                    setTimeout(function () {
+                        location.reload(true);
+                    },1500);
+                }
+            },
+            error:function (data) {
+                ShowDialog(data);
+            }
+        })
+    }
+</script>
+{/block}

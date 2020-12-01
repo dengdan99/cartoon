@@ -1,0 +1,311 @@
+{extend name="pub/base" /}
+{block name="title"}
+<title>后台首页</title>
+{/block}
+{block name="body"}
+<div class="Hui-admin-article">
+    <nav class="breadcrumb" style="background-color:#fff;padding: 0 24px">
+        首页
+        <span class="c-gray en">/</span>
+        站点配置
+        <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px"
+           href="javascript:location.replace(location.href);" title="刷新"><i class="Hui-iconfont">&#xe68f;</i></a>
+    </nav>
+    <div class="Hui-article">
+        <article class="clearfix pd-20">
+            <div class="panel">
+                <div class="panel-body">
+                    <div id="tab-system" class="HuiTab">
+                        <div class="tabBar cl">
+                            <span>基本设置</span>
+                            <span>分页设置</span>
+                            <span>支付设置</span>
+                            <span>SEO设置</span>
+                        </div>
+                        <form class="form form-horizontal" id="form-config">
+                            <div class="tabCon">
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">站点名称：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$site_name}" name="site_name">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">网站协议：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$schema}" name="schema">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">网站域名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$domain}" name="domain">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">图片域名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$img_domain}" name="img_domain">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">移动端域名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$mobile_domain}" name="mobile_domain">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">MIP域名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$mip_domain}" name="mip_domain">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">后台域名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$admin_domain}" name="admin_domain">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">api域名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$api_domain}" name="api_domain">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">app域名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$app_domain}" name="app_domain">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">密码盐：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$salt}" name="salt">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">api密钥：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$api_key}" name="api_key">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">app密钥：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$app_key}" name="app_key">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">模板目录名：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                         <span class="select-box" style="width:150px;">
+                                        <select name="tpl" class="select">
+                                            {volist name="tpl_dirs" id="vo"}
+                                            <option value="{$vo}"
+                                                    {if $vo== ($tpl ?? 0)}
+                                                    selected
+                                                    {/if}
+                                            >{$vo}</option>
+                                            {/volist}
+                                        </select>
+                                         </span>
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">前端cdn：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                         <span class="select-box" style="width:150px;">
+                                        <select name="cdn" class="select">
+                                            <option value="bootcdn"
+                                                    {if $cdn== 'bootcdn'}
+                                                    selected
+                                                    {/if}
+                                            >bootcdn</option>
+                                            <option value="cloudflare"
+                                                    {if $cdn== 'cloudflare'}
+                                                    selected
+                                                    {/if}
+                                            >cloudflare</option>
+                                        </select>
+                                         </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tabCon">
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3"><span
+                                            class="c-red">*</span>后台分页数目：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$back_end_page}"
+                                               name="back_end_page">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3"><span
+                                            class="c-red">*</span>阅读页图片展示数：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$img_per_page}"
+                                               name="img_per_page">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3"><span
+                                            class="c-red">*</span>分类页分页数目：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$booklist_page}"
+                                               name="booklist_page">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">漫画初始化点击量取值范围：</label>
+                                    <div class="formControls col-xs-3 col-sm-2">
+                                        <input type="number" class="input-text" value="{$cartoon_click_min ?? ''}" name="cartoon_click_min" placeholder="最小取值范围">
+                                    </div>
+                                    <div class="formControls col-xs-3 col-sm-2">
+                                        <input type="number" class="input-text" value="{$cartoon_click_max ?? ''}" name="cartoon_click_max" placeholder="最大取值范围">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tabCon">
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>资金名称：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$money_unit_text ?? ''}" name="money_unit_text">
+                                    </div>
+                                </div>
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>现实钱币兑换虚拟钱币的倍数(整数)：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$money_unit_m ?? ''}" name="money_unit_m">
+                                    </div>
+                                </div>
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>支付参数配置：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <textarea name="payment_list" cols="" rows="20" class="textarea" dragonfly="true">{$payment_list}</textarea>
+                                        <div style="color: red">
+                                            非专业人员，请勿修改（否则会造成系统崩溃）
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tabCon">
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">URL端点形式：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <select name="book_end_point" class="select">
+                                            <option value="id"
+                                                    {if $book_end_point == 'id'}
+                                            selected
+                                            {/if}
+                                            >id</option>
+                                            <option value="name"
+                                                    {if $book_end_point == 'name'}
+                                            selected
+                                            {/if}
+                                            >别名</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">URL端点格式：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <select name="name_format" class="select">
+                                            <option value="pure"
+                                                    {if $name_format == 'pure'}
+                                            selected
+                                            {/if}
+                                            >全拼</option>
+                                            <option value="abbr"
+                                                    {if $name_format == 'abbr'}
+                                            selected
+                                            {/if}
+                                            >首字母</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">站点地图生成数量：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <input type="text" class="input-text" value="{$sitemap_gen_num}" name="sitemap_gen_num">
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix">
+                                    <label class="form-label col-xs-4 col-sm-3">百度统计代码：</label>
+                                    <div class="formControls col-xs-8 col-sm-9">
+                                        <textarea name="baidu_js"  cols="" rows="5" class="textarea">{$baidu_js}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row clearfix">
+                                <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+                                    <input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+    </div>
+</div>
+<style>
+    .input-text[type="number"]{
+        width: 100%;!important;
+    }
+</style>
+<script>
+    $(function () {
+        $("#tab-system").Huitab();
+    });
+    $(function () {
+        /* 表单验证，提交 */
+        $("#form-config").validate({
+            onkeyup: false,
+            focusCleanup: false,
+            submitHandler: function (form) {
+                $.ajax({
+                    url: "{:url('update')}",
+                    type: 'post',
+                    data: $('#form-config').serialize(),
+                    success(res) {
+                        if (res.err === 0) {
+                            layer.msg(res.msg, {icon: 1, time: 1000}, function () {
+                                location.reload()
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 5, time: 1000});
+                        }
+                    },
+                    error(data) {
+                        layer.msg(data, {icon: 2, time: 1000})
+                    }
+                })
+            }
+        });
+    });
+
+</script>
+{/block}

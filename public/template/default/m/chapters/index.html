@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="format-detection" content="telephone=no">
+    <meta charset="UTF-8">
+    <title>{$chapter.book.book_name}-{$chapter.chapter_name}在线阅读-{$site_name}</title>
+    <meta name="Description" content="当前阅读的是{$chapter.book.book_name}的{$chapter.chapter_name}"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/mstyle.css">
+    {if $next != "null"}
+    <link rel="prefetch" href="/{$chapter_ctrl}/{$next.id}" />
+    {/if}
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/layer.css" />
+    <script src="/static/admin/js/jquery.min.js"></script>
+    <script src="/static/js/index.js"></script>
+    <!-- <script src="/static/js/common.js"></script> -->
+    <style>
+        
+        .active{
+            color: #fd113a!important;
+        }
+        .default-height{
+            height: 150px;
+        }
+        #popup{
+            position: fixed;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            background:rgba(0, 0, 0, .6);
+            right: -100%;
+            top: 0;
+            bottom: 0;
+            z-index: 99;
+            transition: all ease .3s;
+        }
+        .popup-content{
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 80%;
+            height: 100%;
+            overflow-x: scroll;
+            background-color: #ffffff;
+        }
+        .popup-content .book-name{
+            line-height: 40px;
+            font-size: 20px;
+            text-align: center;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            border-bottom: 1px solid #ccc;
+        }
+        .popup-content .item{
+            z-index: 999;
+            color: #000;
+            padding-left: 10px;
+            line-height: 40px;
+            /* display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical; */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            background-color: #efefef;
+            margin-bottom: 3px;
+        }
+        .popup-content a span{
+            color: #000;
+        }
+        /* .popup-content a:visited span{
+            color: grey;
+        } */
+        .popup-content .item img{
+            height: 20px;
+            margin-right: 5px;
+        }
+        .popup-content .item span{
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body class="viewbody" onclick="showToolBar();" style="min-height: 100vh;">
+<div style="position:relative;height:0;z-index:2147483647;">
+    <div class="view-fix-top-bar" mode="1" style="z-index:2147483647;top: 0;">
+        <a href="/{$book_ctrl}/{$chapter.book_id}" style="position: absolute;height: 60px;width: 60px;">
+            <img class="view-fix-top-bar-back" src="/static/images/view-back-logo.png">
+        </a>
+        <p class="view-fix-top-bar-title">{$chapter.chapter_name}</p>
+        <div class="view-fix-top-bar-right">
+
+            {if $xwx_user_id == null}
+            <a href="javascript:void(0);" class="collection">
+                <img class="view-fix-top-bar-right-logo" src="/static/images/view-top-logo-1.png">
+            </a>
+            {else /}
+            {if $isfavor == 0}
+            <a href="javascript:void(0);" class="collection" data-val="0" id="addfavor">
+                <img class="view-fix-top-bar-right-logo" src="/static/images/view-top-logo-1.png">
+            </a>
+            {else /}
+            <a href="javascript:void(0);" class="collection" data-val="1" id="addfavor">
+                <img class="view-fix-top-bar-right-logo" src="/static/images/book-list-bottom-right-2.png">
+            </a>
+            {/if}
+            {/if}
+            <a href="/">
+                <img class="view-fix-top-bar-right-logo" src="/static/images/view-top-logo-2.png">
+            </a>
+        </div>
+        <script>
+            $('#addfavor').click(function () {
+                var val = $(this).attr('data-val');
+                $.ajax({
+                    method: 'post',
+                    url:'/addfavor',
+                    data:{'book_id' : {$chapter.book_id}, 'val' : val },
+                    success: function (res) {
+                        if (res.err == 1){
+                            ShowDialog(res.msg);
+                        } else {
+                            if (res.isfavor == 1){ //表示收藏了，将控件状态改为已收藏
+                                $('#addfavor').attr('data-val',1);
+                                $('#addfavor img.view-fix-top-bar-right-logo').attr('src','/static/images/book-list-bottom-right-2.png')
+                                ShowDialog('收藏成功');
+                            } else { //更改为未收藏
+                                $('#addfavor').attr('data-val',0);
+                                $('#addfavor img.view-fix-top-bar-right-logo').attr('src','/static/images/view-top-logo-1.png')
+                                ShowDialog('取消收藏');
+                            }
+                        }
+                    },
+                })
+            })
+
+        </script>
+    </div>
+</div>
+
+<div class="view-main-1 readForm" id="cp_img">
+    {volist name="photos" id="vo"}
+    <!-- <img class="lazy" data-original="{$vo.img_url}" src="/static/images/loading.gif"> -->
+    <img class="lazyImg default-height" data-original="{$vo.img_url}" src="/static/images/loading02.gif">
+    {/volist}
+</div>
+
+<ul class="view-bottom-bar">
+    {if $prev == "null"}
+    <li style="width:25%;opacity: 0.6;"><a class="view-bottom-bar-item">上一章</a></li>
+    {else /}
+    <li style="width:25%;"><a class="view-bottom-bar-item" href="/{$chapter_ctrl}/{$prev.id}">上一章</a></li>
+    {/if}
+
+    {if $page.last_page > 1}
+    {if $page.current_page == 1}
+    <li style="width:25%;opacity: 0.6;">
+        <a class="view-bottom-bar-item">上一页</a>
+    </li>
+    {else/}
+    <li style="width:25%;">
+        <a class="view-bottom-bar-item" href="/{$chapter_ctrl}/{$chapter.id}?page={$page.current_page-1}">上一页</a>
+    </li>
+    {/if}
+
+    {if $page.current_page == $page.last_page}
+    <li style="width:25%;opacity: 0.6;">
+        <a class="view-bottom-bar-item">下一页</a>
+    </li>
+    {else/}
+    <li style="width:25%;">
+        <a class="view-bottom-bar-item" href="/{$chapter_ctrl}/{$chapter.id}?page={$page.current_page+1}">下一页</a>
+    </li>
+    {/if}
+    {else/}
+    <li style="width: 25%; visibility: hidden;"><a class="view-bottom-bar-item">占位用</a></li>
+    <li style="width: 25%; visibility: hidden;"><a class="view-bottom-bar-item">占位用</a></li>
+    {/if}
+
+    {if $next == "null"}
+    <li style="width:25%;opacity: 0.6;"><a class="view-bottom-bar-item" href="javascript:void(0)">下一章</a></li>
+    {else /}
+    <li style="width:25%;"><a class="view-bottom-bar-item" href="/{$chapter_ctrl}/{$next.id}">下一章</a></li>
+    {/if}
+</ul>
+<div class="view-fix-bottom-bar" mode="1" style="display: flex;justify-content: space-between;bottom: 0;">
+    
+    <a class="view-fix-bottom-bar-item" style="visibility:hidden">占位</a>
+    {if $prev == "null"}
+    <a class="view-fix-bottom-bar-item" style="opacity: 0.6;">
+        <img class="view-fix-bottom-bar-logo" src="/static/images/view-bottom-logo-5.png">
+        <p class="view-fix-bottom-bar-title">上一章</p>
+    </a>
+    {else /}
+    <a class="view-fix-bottom-bar-item" href="/{$chapter_ctrl}/{$prev.id}">
+        <img class="view-fix-bottom-bar-logo" src="/static/images/view-bottom-logo-5.png">
+        <p class="view-fix-bottom-bar-title">上一章</p>
+    </a>
+    {/if}
+
+    {if $next == "null"}
+    <a class="view-fix-bottom-bar-item" style="opacity: 0.6;">
+        <img class="view-fix-bottom-bar-logo" src="/static/images/view-bottom-logo-6.png">
+        <p class="view-fix-bottom-bar-title">下一章</p>
+    </a>
+    {else /}
+    <a class="view-fix-bottom-bar-item" href="/{$chapter_ctrl}/{$next.id}">
+        <img class="view-fix-bottom-bar-logo" src="/static/images/view-bottom-logo-6.png">
+        <p class="view-fix-bottom-bar-title">下一章</p>
+    </a>
+    {/if}
+    <!-- <a class="view-fix-bottom-bar-item" href="/{$book_ctrl}/{$chapter.book.param}"> -->
+    <a class="view-fix-bottom-bar-item" href="javascript:void(0)" onclick="handlePopup()">
+        <img class="view-fix-bottom-bar-logo" src="/static/images/view-bottom-logo-1.png">
+        <p class="view-fix-bottom-bar-title">目录</p>
+    </a>
+    <div class="toast" style="display:none;"></div>
+    
+</div>
+<div id="popup"  mode="0" >
+    <div class="popup-content">
+        <p class="book-name">{$chapter.book.book_name}</p>
+        {volist name="chapters" id="vo"}
+            <a href="/{$chapter_ctrl}/{$vo.id}" title="{$vo.chapter_name}" class="item">
+            <!-- <a href="javascript:void(0)" title="{$vo.chapter_name}" class="item"> -->
+                {if $vo.chapter_order >= $start_pay }
+                <img src="/static/images/center-main-list-logo-4.png">
+                {/if}
+                <span onclick="setLocalStorage('{$vo.id}')" class="chapter-name {if $vo.id == $chapter.id }active{/if}" data-id="{$vo.id}">{$vo.chapter_name}</span>
+            </a>
+
+        {/volist}
+    </div>
+</div>
+<script src="/static/admin/js/jquery.lazyload.min.js"></script>
+<script src="/static/admin/js/js.cookie.min.js"></script>
+<script type="text/javascript" src="/static/admin/lib/layer/3.1.1/layer.js"></script>
+<script>
+    
+    /*
+    大体思路：
+    1.对于所有的img标签，把真实的地址放入自定义属性data-img
+    2.当滚动页面时，检查页面所有的img标签，看看这个标签是否出现到我们的视野，当出现在我们的视野时
+    再去判断它是否已经加载过，如果没有加载，加载它
+    */
+
+    
+    // 用户第一次打开页面，还未滚动窗口的时候需要执行一次 lazyRender
+    $(document).ready(function(){
+      lazyRender();
+      var clock;
+      $(window).on('scroll',function(){
+            // 隐藏上下工具栏
+            $top = $('.view-fix-top-bar');
+            $bottom = $('.view-fix-bottom-bar');
+            $top.css('top', '-60px');
+            $top.attr('mode', 0);
+            $bottom.css('bottom', '-60px');
+            $bottom.attr('mode', 0);
+           //用户鼠标滚轮滚动一次，有多次事件响应。下面的 setTimeout 主要是为性能考虑，只在最后一次事件响应的时候执行 lazyRender，若在300毫秒内再次滚动则清除原来的定时器
+          if(clock){
+              clearTimeout(clock)
+          }
+          clock = setTimeout(function(){
+              lazyRender();
+          }, 300)
+          
+      })
+  
+  
+      function lazyRender() {
+          $('img.lazyImg').each(function(){
+              //判断图片是否出现在可视窗口和图片是否已经加载
+              if( checkShow($(this)) && !isLoaded($(this)) ){
+                  //若图片出现在可是区域且没有加载，加载图片
+                  loadImg($(this))
+              }
+          })
+      }
+  
+      //判断图片出没出现在可视窗口
+      function checkShow($img) {
+        //获取浏览器窗口高度
+        var windowHeight = $(window).height(),
+        //获取窗口滚动的高度
+            windowScrolltop = $(window).scrollTop(),
+        //获取图片到页面顶部的高度
+            imgOffsettop = $img.offset().top,
+        //获取图片元素自己的高度,包括内外边距
+            imgHeight = $img.outerHeight(true);
+        if((windowHeight + windowScrolltop) >= (imgOffsettop - windowHeight) && (imgOffsettop + imgHeight) >= windowScrolltop){
+          return true
+        }
+        return false 
+      }
+  
+      //判断图片加没加载过
+      function isLoaded($img) {
+        // return $img.attr('data-original') === $img.attr('src')
+        return $img.attr('isLoad') == 'true'
+      }
+              
+      //加载图片
+      function loadImg($img) {
+          var _self = this;
+          var text = $img.attr("data-original");
+          var str = text.substring(text.length-4);
+          $img.attr("isLoad", 'true');
+          if(str == '.txt' || text.indexOf('.html' > 10)) {
+              $.ajax({
+                  url: text,
+                  dataType: 'text',
+                  success: function(data, status) {
+                    $img.attr("src", data);
+                    $img.attr("data-original", data);
+                    $img.removeClass("default-height");
+
+                      // obj.src = data
+                  }
+              })
+
+          } else {
+              $img.attr("src", text);
+              $img.removeClass("default-height");
+          }
+          // $img.attr('src',$img.attr('data-original'))
+      }
+  })
+</script>
+<script>
+    // $("img.lazy")
+    //     .lazyload({
+    //         threshold: 180,
+    //         event: "lazyload",
+    //         effect: "fadeIn",
+    //         effectspeed: 2000
+    //     })
+    //     .trigger("lazyload");
+
+    //--本地缓存代码开始--
+    let bookInfo = {
+        chapter_id: '{$chapter.id}',
+        end: "{$chapter.book.end == 1 ? '完结' : '连载'}",
+        chapter_name: '{$chapter.chapter_name}',
+        cover_url:'{$chapter.book.cover_url}',
+        book_id: '{$chapter.book_id}',
+        last_time: "{$chapter.book.last_time|date='Y-m-d'}",
+        book_name:'{$chapter.book.book_name}',
+        param: '{$chapter.book.param}'
+    };
+    localStorage.setItem('manhua_{$chapter.book_id}', JSON.stringify(bookInfo));//id为键，设置缓存
+    let history = [];
+    let value = localStorage.getItem('xwx_historys'); //读取参照数组
+    if (value != undefined && value != null) {
+        history = JSON.parse(value);
+    }
+    if (history.indexOf('manhua_{$chapter.book_id}') === -1) {
+        history.push('manhua_{$chapter.book_id}'); //把id为值存入参照数组
+    }
+
+    localStorage.setItem('xwx_historys', JSON.stringify(history));
+    //--本地缓存代码结束--
+
+    // 缓存点击过的章节 start
+    var chapter_id = '{$chapter.id}';
+    var book_id = '{$chapter.book_id}';
+    var list = JSON.parse(localStorage.getItem(book_id)) || [];
+    $('.chapter-name').each(function(i, v) {
+        var id = $(this).attr('data-id');
+        if(list.includes(id)) {
+            $(this).css('color', 'grey');
+        }
+    }) 
+    if(!list.includes(chapter_id)) {
+        list.push(chapter_id);
+        localStorage.setItem(book_id, JSON.stringify(list));
+    }   
+    // function setLocalStorage(id){
+    //     if(!list.includes(id)) {
+    //         list.push(id);
+    //         localStorage.setItem(book_id, JSON.stringify(list));
+    //     }
+    // }
+    // 缓存点击过的章节 end
+
+    document.body.oncopy = function () {
+        return false;
+    }; //阻止复制
+    document.body.onselectstart = function () {
+        return false;
+    }; //阻止选中
+    document.oncontextmenu = function () {
+        return false;
+    }; //阻止菜单弹出
+    if (document.images) {
+        for (i = 0; i < document.images.length; i++) {
+            document.images[i].onmousedown = function () {
+                return false;
+            };
+        }
+    }
+    var showPopup = 0;
+    function showToolBar() {
+        $top = $('.view-fix-top-bar');
+        $bottom = $('.view-fix-bottom-bar');
+        $popup = $('#popup');
+
+        if ($top.attr('mode') == 0) {
+            $top.css('top', '0px');
+            $top.attr('mode', 1);
+        } else {
+            $top.css('top', '-60px');
+            $top.attr('mode', 0);
+        }
+
+        if ($bottom.attr('mode') == 0) {
+            $bottom.css('bottom', '0px');
+            $bottom.attr('mode', 1);
+        } else {
+            $bottom.css('bottom', '-60px');
+            $bottom.attr('mode', 0);
+        }
+
+
+    }
+    function handlePopup(){
+        $popup = $('#popup');
+        if ($popup.attr('mode') == 0) {
+            $popup.css('right', '0px');
+            $popup.attr('mode', 1);
+        } else {
+            $popup.css('right', '-100%');
+            $popup.attr('mode', 0);
+        }
+    }
+    $('#popup').on('click', function(e) {
+        var ev = e || window.event;
+        if(ev && ev.stopPropagation) {
+            //非IE浏览器
+            ev.stopPropagation();
+        } else {
+            //IE浏览器(IE11以下)
+            ev.cancelBubble = true;
+        }
+        $popup = $('#popup');
+        $popup.css('right', '-100%');
+        $popup.attr('mode', 0);
+    })
+</script>
+{include file="./template/default/m/pub/others.html"}
+</body>
+</html>

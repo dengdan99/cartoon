@@ -1,0 +1,58 @@
+{extend name="./template/default/m/pub/base.html" /}
+{block name="seo"}
+<title>漫画排行榜-{$site_name}</title>
+{php}$tpl = 'rank';{/php}
+{/block}
+{block name="content"}
+{include file="./template/default/m/pub/top2.html" /}
+<div class="rank-selector">
+    <a class="rank-selector-item active" href="javascript:void(0);" onclick="btnClick(this,'#rankList_1');">新番榜</a>
+    <a class="rank-selector-item" href="javascript:void(0);" onclick="btnClick(this,'#rankList_2'); ">人气榜</a>
+    <a class="rank-selector-item" href="javascript:void(0);" onclick="btnClick(this,'#rankList_3'); ">完结榜</a>
+<!--    <a class="rank-selector-item" href="javascript:void(0);" onclick="btnClick(this,'#rankList_4');">充值榜</a>-->
+</div>
+<div style="height: 90px;"></div>
+<div class="rank-list-con">
+    {volist name="list" id="item" key="k"}
+    {if $k == 1}
+    <ul class="rank-list" id="rankList_{$k}" style="display: block;">
+        {else /}
+        <ul class="rank-list" id="rankList_{$k}" style="display: none;">
+            {/if}
+            {volist name="item['keyword']" id="keyword" key="j"}
+            <a href="/{$book_ctrl}/{$keyword.param}" title="{$keyword.book_name}">
+                <li>
+                    <div class="rank-list-cover">
+                        <img class="rank-list-cover-img lazy selectImg" data-original="{$keyword.cover_url}"
+                             src="/static/images/loading02.gif" alt="{$keyword.book_name}">
+                    </div>
+                    <div class="rank-list-info">
+                        <div class="rank-list-info-left">
+                            <span class="rank-list-info-left-index top-{$j}">{$j}</span>
+                        </div>
+                        <div class="rank-list-info-right">
+                            <p class="rank-list-info-right-title">{$keyword.book_name}</p>
+                        </div>
+                    </div>
+                    <div class="rank-list-info">
+                        <p style="font-size: 14px;padding: 5px 0;color: #999999;">{$keyword.clicks}次点击</p>
+                    </div>
+                </li>
+            </a>
+            {/volist}
+        </ul>
+        {/volist}
+</div>
+<div class="noDataFont" style="padding:10px;font-size:12px;color:#767676;text-align: center;">主人，下面木有了~</div>
+{include file="./template/default/m/pub/tabs.html" /}
+
+<script>
+    function btnClick(item,c) {
+        $('.rank-selector-item').removeClass('active');
+        $(item).addClass('active');
+        $('.rank-list').hide();
+        $(c).show();
+        $('body').scrollTop(0);
+    }
+</script>
+{/block}

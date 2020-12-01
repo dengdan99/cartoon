@@ -1,0 +1,149 @@
+{extend name="./template/default/m/pub/base.html" /}
+{block name="seo"}
+{php}$tpl = 'charge';{/php}
+<title>用户充值-{$site_name}</title>
+{/block}
+{block name="content"}
+<link rel="stylesheet" type="text/css" href="/static/css/charge.css">
+
+<!-- {include file="./template/default/m/pub/top3.html" /} -->
+
+<div id="app">
+    <div class="top-box">
+        <div class="top-item">您的充值账号为:</div>
+        <div class="top-item">账号: &nbsp;<span>{$user.username}</span></div>
+        <div class="top-item">密码: &nbsp;<span>{:cookie('xwx_user_pwd') ?? '123456'}</span></div>
+
+    </div>
+
+    <div class="info-box">
+        <div class="info-item">
+            <div class="info-top">
+                <div class="img-box">
+                    <img src="/static/images/jinbi.png" alt="">
+                </div>
+                <div class="top-text">{$balance}</div>
+            </div>
+            <div class="info-bottom">
+                <div class="bottom-title">{:config('extra_config.payment.money_unit_text')}</div>
+                <div class="bottom-text">剩余{:config('extra_config.payment.money_unit_text')}</div>
+            </div>
+        </div>
+        <div class="line-column"></div>
+        <div class="info-item">
+            <div class="info-top">
+                <div class="img-box">
+                    <img src="/static/images/vip.png" alt="">
+                </div>
+                <div class="top-text">{$day}</div>
+            </div>
+            <div class="info-bottom">
+                <div class="bottom-title">vip</div>
+                <div class="bottom-text">剩余天数</div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="recharge-selector">
+        {foreach $moneys as $key=>$money }
+        <li>
+            <a href="javascript:void(0);" class="item" data-val="{$key}">
+                <div class="left-box">
+                    <div class="one-box">
+                        <div class="num">{$money.price}元</div>
+                        {notempty name="$money['icon']"}
+                        <div class="text text1">{$money.icon}</div>
+                        {/notempty}
+                    </div>
+                    <div class="two-box">{$money.text1}</div>
+                    <div class="three-box">{$money.text2}</div>
+                </div>
+                <div class="right-box">
+                    <img src="{$money.img}" alt="">
+                </div>
+            </a>
+        </li>
+        {/foreach}
+        
+    </ul>
+
+
+    <div class="recharge-style">
+
+    {volist name="payments" id="vo"}
+        {notempty name="vo"}
+            <div class="{$vo.class}" data-val="{$vo.type}" data-code="{$vo.code}">
+                <img src="/static/images/{$vo.img}.png" class="logo"/>
+                <span>{$vo.title}</span>
+            </div>
+        {/notempty}
+    {/volist}
+    </div>
+
+    {include file="./template/default/m/pub/tabs.html" /}
+<script type="text/javascript" src="/static/admin/lib/layer/3.1.1/layer.js"></script>
+
+<script type="text/javascript" src="/static/js/md5.min.js"></script>
+<script>
+    var choose=null;
+
+    $('.recharge-selector li a').click(function () {
+        $(this).addClass('addbg').parent().siblings().find('a').removeClass('addbg');
+        choose = $(this).attr('data-val');
+    })
+
+    $('.recharge-style div').click(function () {
+        if (choose === null){
+            // alert("请先选择充值类型");
+            layer.msg("请先选择充值类型",{icon:2});
+            return false;
+        }
+        $(this).addClass('active').siblings().removeClass('active');
+        var pay_type = $(this).attr('data-val');
+        var pay_code = $(this).attr('data-code');
+
+        // window.location.href = '/charge-set?choose='+choose+'&pay_type='+pay_type+'&code='+pay_code;
+        layer.load();
+        // 充值
+        $.ajax({
+            url: '/charge',
+            type: 'POST',
+            data: {"choose": choose,"pay_type":pay_type,"code":pay_code},
+            dataType: 'json',
+            success: function (response) {
+                layer.closeAll()
+                if (response.status === 1 && response.payurl) {
+                    parent.location.href = response.payurl;
+                    getPayResult(3000,response.xwx_order_id);
+                } else {
+                    layer.msg(response.text, {icon:2,timeout:1000});
+                }
+            }
+        })
+    })
+
+    // 轮询充值状态  判断是否充值完毕
+    // time: setInterval间隔时间
+    function getPayResult(time,order_id) {
+        var interval = setInterval(function () {
+            $.ajax({
+                url: '/order/find',
+                type: 'POST',
+                data: {"order_id": order_id},
+                dataType: 'json',
+                success: function (response) {
+                    if (response.code === 0) {
+                        clearInterval(interval);
+                        // 充值成功跳转到修改密码页面
+                        layer.msg('是否修改密码', {icon: 1, time: 1000}, function () {
+                            window.location.href = "/userinfo";
+                        });
+
+                    }
+                }
+            })
+        }, time)
+    }
+
+</script>
+{/block}

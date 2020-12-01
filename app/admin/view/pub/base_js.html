@@ -1,0 +1,18 @@
+<script>
+    function editCreate(title, url) {
+        let l = $("aside").css('width'),
+            width = $(".Hui-admin-article-wrapper").css('width'),
+            height = $(".Hui-admin-article-wrapper").css('height');
+        var index = layer.open({
+            type: 2,
+            title: title,
+            content: url,
+            offset:['0px',l],
+            area: [width, height],  //弹出层页面比例
+            cancel: function () {
+                window.location.reload();
+            }
+        });
+        // layer.full(index);
+    }
+</script>

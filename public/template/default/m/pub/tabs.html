@@ -1,0 +1,43 @@
+<div class="null-box" style="height: 75px;"></div>
+<div class="index-menu" style="position: fixed;left: 0;right: 0;bottom: 0;background-color: #f8f8f8;z-index: 999;">
+  <div class="index-menu-item">
+      <a href="/">
+          <img class="index-menu-item-img" src="/static/images/index-menu-1.png">
+          {if $tpl == 'index'}
+          <p class="index-menu-item-title addTabColor1">首页</p>
+          {else/}
+          <p class="index-menu-item-title">首页</p>
+          {/if}
+      </a>
+  </div>
+  <div class="index-menu-item">
+      <a href="/rank">
+          <img class="index-menu-item-img" src="/static/images/index-menu-2.png">
+          {if $tpl == 'rank'}
+          <p class="index-menu-item-title addTabColor2">排行</p>
+          {else/}
+          <p class="index-menu-item-title">排行</p>
+          {/if}
+      </a>
+  </div>
+  <div class="index-menu-item">
+      <a href="/charge">
+          <img class="index-menu-item-img" src="/static/images/index-menu-3.png">
+          {if $tpl == 'charge'}
+          <p class="index-menu-item-title addTabColor3">充值</p>
+          {else/}
+          <p class="index-menu-item-title">充值</p>
+          {/if}
+      </a>
+  </div>
+  <div class="index-menu-item">
+      <a href="/ucenter">
+          <img class="index-menu-item-img" src="/static/images/index-menu-4.png">
+          {if $tpl == 'ucenter'}
+          <p class="index-menu-item-title addTabColor4">我的</p>
+          {else/}
+          <p class="index-menu-item-title">我的</p>
+          {/if}
+      </a>
+  </div>
+</div>

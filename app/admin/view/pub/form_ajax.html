@@ -1,0 +1,45 @@
+<script type="text/javascript">
+    layui.use(['form'],function () {
+        let form = layui.form;
+        form.on('submit(postForm)', function(data){
+            var _method = $(":input[name='_method']").val(),
+                method = $('form').attr('method');
+            if (_method == 'put') {
+                method = _method;
+            }
+            $.ajax({
+                url:$('form').attr('action'),
+                data:data.field,
+                type:method,
+                dataType:'json',
+                success:function(response){
+                    if(response.code === 0){
+                        parent.layer.msg(response.message,{icon:1,timeout:2},function () {
+                            if(response.jump != ''){
+                                window.location.href = response.jump;
+                            }
+                        });
+                    } else {
+                        parent.layer.msg(response.message,{icon:2,timeout:2});
+                    }
+                },
+                error:function (response) {
+                    parent.layer.msg(response.message,{icon:2,timeout:2});
+                }
+        });
+            return false;
+        });
+
+
+        $('#close').click(function () {
+            close();
+        });
+        function close(reload){
+            if(typeof(reload) !== 'undefined') {
+                window.parent.location.reload();
+            }
+            let index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+        }
+    });
+</script>

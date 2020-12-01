@@ -1,0 +1,45 @@
+{extend name="pub/base2" /}
+{block name="title"}
+<title>漫画初始化点击量</title>
+{/block}
+
+{block name="body"}
+<article class="clearfix pd-20">
+    <form action="{:url('editClick')}" method="post" id="form" class="form form-horizontal">
+        <input type="hidden" name="id" value="{$id}">
+        <div class="row clearfix">
+            <label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>初始化点击量：</label>
+            <div class="formControls col-xs-8 col-sm-9">
+                <input type="text" class="input-text" value="{$clicks}" name="clicks">
+            </div>
+        </div>
+        <div class="row cl">
+            <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+                <input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+            </div>
+        </div>
+    </form>
+</article>
+{/block}
+{block name="script"}
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript">
+    $(function () {
+        $("form").validate({
+            onkeyup: false,
+            focusCleanup: false,
+            submitHandler: function(form) {
+                $.ajax({
+                    url:"{:url('editClick')}",
+                    type:'post',
+                    data:$('form').serialize(),
+                    success(res) {
+                        subResHandle(res)
+                    }
+                })
+            }
+        });
+    });
+</script>
+<!--/请在上方写此页面业务相关的脚本-->
+{/block}

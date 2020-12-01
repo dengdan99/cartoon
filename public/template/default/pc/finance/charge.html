@@ -1,0 +1,219 @@
+{extend name="./template/default/pc/pub/base.html" /}
+{block name="seo"}
+<title>用户充值-{$site_name}</title>
+{/block}
+{block name="content"}
+<style>
+    .charge-box-reset{
+        /* height:115px; */
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
+    }
+    .charge-left{
+        display: flex;
+        flex-direction: column;
+    }
+    .charge-left .price-wrap{
+        display: flex;
+        align-items: center;
+        text-align: left;
+    }
+    .charge-left .price-wrap .price{
+        color: #333;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    .charge-left .price-wrap .tag{
+        padding: 1px 4px;
+        color: #eee;
+        font-size: 0.5rem;
+        margin-left: 10px;
+        border-radius: 3px;
+        background-color: #ff0200;
+    }
+    .charge-left .vip{
+        color: #ed3b42;
+        font-size: 0.8rem;
+        padding: 4px 0 6px 0;
+        text-align: left;
+    }
+    .charge-left .text{
+        font-size: 0.7rem;
+        color: #b0b0b0;
+        text-align: left;
+    }
+    .charge-right{
+        height: 2.2rem;
+        width: 2.2rem;
+    }
+    .charge-right img{
+        height: 100%;
+        width: 100%;
+    }
+</style>
+<main class="container-fluid overflow-Show clearfix" style="min-height:750px;">
+    <div class="container">
+        <section class="vip-recharge-con">
+            <div class="txt-ad"> </div>
+            <div class="recharge-body mt20">
+                <div class="top"><span class="label">充值账号：</span>
+                    {$user.username} &nbsp;&nbsp;&nbsp;&nbsp;密码: {:cookie('xwx_user_pwd') ?? '123456'} &nbsp;&nbsp;&nbsp;&nbsp;当前余额:{$balance}元
+                </div>
+                <div class="head">
+                    <span class="label">充值方式：</span>
+                </div>
+                <ul class="channel-list">
+                    {volist name="payments" id="vo"}
+                    <li>
+                        <label>
+                            <input type="radio" name="channel" class="channel" data-val="{$vo.type}" data-code="{$vo.code}" checked="">
+                            <div class="charge-box">
+                                <img src="/static/images/{$vo.img}.png" alt="" style="width:auto;height:40px"> {$vo.title}
+                            </div>
+                        </label>
+                    </li>
+                    {/volist}
+                    <li>
+                        <label>
+                            <input type="radio" name="channel" class="channel" >
+                            <div class="charge-box" onclick="location.href = '/kami'">
+                                <img src="/static/images/kami.png" alt="" style="width:auto;height:40px"> 购买卡密
+                            </div>
+                        </label>
+                    </li>
+
+                </ul>
+                <div class="head"><span class="label">充值金额：</span></div>
+                <ul class="amount-list">
+                    <!-- {volist name="moneys" id="vo"}
+                    <li style="margin:5px 77px 15px 0;">
+                        <label>
+                            <input type="radio" name="wxpay" class="goodsItem" checked="">
+                            <div style="display:inline-block;height:115px;">
+                                <p class="time"> <span>{$vo.text1}</span> </p>
+                                <p>
+                                    <span class="color-main"> ￥ <span class="price">{$vo.price}</span> </span> <span class="original"></span>
+                                </p>
+                            </div>
+                        </label>
+                    </li>
+                    {/volist} -->
+                    {volist name="moneys" id="vo"}
+                    <li style="margin:5px 77px 15px 0;">
+                        <label>
+                            <input type="radio" name="wxpay" class="goodsItem" checked="" value="{$key}">
+                            <div class="charge-box-reset charge-box" style="display: flex;">
+                               <div class="charge-left">
+                                   <div class="price-wrap">
+                                       <div class="price">{$vo.price}</div>
+                                       <div class="tag">热销</div>
+                                   </div>
+                                   <div class="vip">{$vo.text1}</div>
+                                   <div class="text">{$vo.text2}</div>
+                               </div>
+                               <div class="charge-right">
+                                   <img src="/static/images/zuan.png" alt="">
+                               </div>
+                            </div>
+                        </label>
+                    </li>
+                    {/volist}
+                </ul>
+                <div class="bottom head"><span class="label">需支付:</span><span class="total"></span></div>
+            </div>
+            <script>
+                $(document).ready(function () {
+                    var checkedItem = $('.goodsItem:checked');
+                    var checkedChannel = $('.channel:checked');
+                    $('.total').text('￥' + checkedItem.next().find('.charge-left .price').text());
+
+                    $('#choose').val(checkedItem.val());
+                    $('#pay_type').val(checkedChannel.attr('data-val'));
+                    $('#code').val(checkedChannel.attr('data-code'));
+                })
+
+                $('.goodsItem').click(function () {
+                    $('.total').text('￥' + $(this).next().find('.charge-left .price').text());
+                    $('#choose').val($(this).val());
+                })
+                $('.channel').click(function () {
+                    $('#pay_type').val($(this).attr('data-val'));
+                    $('#code').val($(this).attr('data-code'));
+                })
+            </script>
+            <div class="recharge-footer mb20">
+                <form action="charge" method="post">
+                    <input type="hidden" name="choose" id="choose" value="">
+                    <input type="hidden" name="pay_type" id="pay_type" value="">
+                    <input type="hidden" name="code" id="code">
+                    <span class="label">
+                        <input type="button" value="同意协议并充值" class="channel-btn">
+                    </span>
+                    <span>
+                        <a href="#" target="_blank">用户充值、消费服务协议</a>
+                    </span>
+                    <span class="tip">成为本站vip，可以免费阅读所有收费章节，不再有额外消费</span>
+                </form>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+
+    $('.channel-btn').click(function () {
+        var choose = $('#choose').val();
+
+        if (choose === null){
+            // alert("请先选择充值类型");
+            layer.msg("请先选择充值类型",{icon:2});
+            return false;
+        }
+        var pay_type = $('#pay_type').val();
+        var pay_code = $('#code').val();
+
+        // window.location.href = '/charge-set?choose='+choose+'&pay_type='+pay_type+'&code='+pay_code;
+
+        // 充值
+        $.ajax({
+            url: '/charge',
+            type: 'POST',
+            data: {"choose": choose,"pay_type":pay_type,"code":pay_code},
+            dataType: 'json',
+            success: function (response) {
+                if (response.code === 0) {
+                    parent.location.href = response.jump;
+                    getPayResult(3000,response.data);
+                } else {
+                    layer.msg(response.message,{icon:2,timeout:1});
+                }
+            }
+        })
+    })
+
+    // 轮询充值状态  判断是否充值完毕
+    // time: setInterval间隔时间
+    function getPayResult(time,order_id) {
+        var interval = setInterval(function () {
+            $.ajax({
+                url: '/order/find',
+                type: 'POST',
+                data: {"order_id": order_id},
+                dataType: 'json',
+                success: function (response) {
+                    if (response.code === 0) {
+                        clearInterval(interval);
+                        // 充值成功跳转到修改密码页面
+                        layer.msg('是否修改密码', {icon: 1, time: 1000}, function () {
+                            window.location.href = "/userinfo";
+                        });
+
+                    }
+                }
+            })
+        }, time)
+    }
+
+</script>
+{/block}

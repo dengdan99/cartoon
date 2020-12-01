@@ -1,0 +1,61 @@
+{extend name="./template/default/m/pub/base.html" /}
+{block name="seo"}
+<title>用户登录-{$site_name}</title>
+{/block}
+{block name="css"}
+<link rel="stylesheet" href="/static/css/account.css">
+{/block}
+{block name="content"}
+{include file="./template/default/m/pub/top2.html" /}
+<form id="form-login">
+    <div class="line-container">
+        <div class="input-con">
+            <span class="input-con-title">用户名</span>
+            <input id="username" name="username" class="txt_phone" type="text" placeholder="输入用户名" value="">
+        </div>
+        <div class="input-con">
+            <span class="input-con-title">旧密码</span>
+            <input id="old_password" name="password" class="txt_password" type="password" placeholder="密码" value="">
+        </div>
+        <div class="input-con">
+            <span class="input-con-title">新密码</span>
+            <input id="password" name="password" class="txt_password" type="password" placeholder="密码" value="">
+        </div>
+        <div class="input-con">
+            <span class="input-con-title">确认新密码</span>
+            <input id="password_confirm" name="password" class="txt_password" type="password" placeholder="密码" value="">
+        </div>
+        
+    </div>
+</form>
+<a href="javascript:void(0)" onclick="editInfo();" class="line-container-btn">登录</a>
+
+<div class="toast" style="display:none;"></div>
+<script>
+    function editInfo() {
+        var data = {
+            username: $('#username').val(),
+            old_password: $('#old_password').val(),
+            password: $('#password').val(),
+            password_confirm: $('#password_confirm').val()
+        }
+        $.ajax({
+            method: 'post',
+            url: '/userinfo',
+            data: data,
+            success:function (res) {
+                ShowDialog(res.msg);
+                
+                if(res.err == 0) {
+                    setTimeout(function () {
+                        window.location.href = document.referrer;
+                    },1500);
+                }
+            },
+            error:function (data) {
+                ShowDialog(data);
+            }
+        })
+    }
+</script>
+{/block}

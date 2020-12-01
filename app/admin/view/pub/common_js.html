@@ -1,0 +1,301 @@
+<script>
+
+var isClick = true;
+$(".btn-primary").on("click",function(){
+    if(isClick) {
+        isClick = false;
+        //事件
+        console.log('click');
+        //定时器
+        setTimeout(function() {
+            isClick = true;
+        }, 2000);//一秒内不能重复点击
+    }
+});
+
+    // 左侧菜单高亮 start
+function setLi(index) {  
+    // alert(index)
+    window.localStorage.setItem('liIndex', index)
+    const menuIndex = window.localStorage.getItem('preMenuIndex')
+    window.localStorage.setItem('menuIndex', menuIndex)
+    
+}
+function setMenu(index) {
+    // alert(index)
+    window.localStorage.setItem('preMenuIndex', index)
+}
+
+$(function(){
+    function saveTabActive() {
+        const liIndex = parseInt(window.localStorage.getItem('liIndex') || 0)
+        const menuIndex = parseInt(window.localStorage.getItem('menuIndex') || 0)
+        const tabs = $('.Hui-menu-title')
+        const items = $('.Hui-menu-item')
+        const lis = $('ul li a')
+        $('.Hui-menu-title').removeClass('selected')
+        $('#m-' + menuIndex).addClass('selected')
+
+        $('.Hui-menu-item').css({'display': 'none'})
+        $('#i-' + menuIndex).css({'display': 'block'})
+        
+        $('.Hui-menu li a').removeClass('activeLi')
+        $('#l-' + liIndex + ' a').addClass('activeLi')
+
+    }
+    saveTabActive()
+});
+// 左侧菜单高亮 end
+
+    function del(obj, id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            $.ajax({
+                type: 'POST',
+                url: "{:url('delete')}",
+                data: {id: id},
+                dataType: 'json',
+                success: function (result) {
+                    if (result.err === 0) { //删除成功
+                        layer.msg(result.msg, {icon: 1, time: 1000}, function () {
+                            clearCache();
+                            location.reload();
+                        });
+                    } else {
+                        layer.msg(result.msg, {icon: 2}, function () {
+                            location.reload();
+                        });
+                    }
+                },
+                error: function (data) {
+                    layer.msg(data);
+                },
+            });
+        });
+    }
+
+    function member_stop(id) {
+        layer.confirm('确认要停用吗？', function (index) {
+            $.ajax({
+                type: 'post',
+                url: "{:url('disable')}",
+                data: {'id': id},
+                success: function (res) {
+                    if (res.err === 0) {
+                        layer.msg('已停用!', {icon: 1, time: 1000,}, function () {
+                            clearCache();
+                            location.reload();
+                        });
+                    } else {
+                        layer.msg('操作出错', {icon: 5, time: 1000})
+                    }
+                }
+            })
+        });
+    }
+
+    /*用户-启用*/
+    function member_start(id) {
+        layer.confirm('确认要启用吗？', function (index) {
+            $.ajax({
+                type: 'post',
+                url: "{:url('enable')}",
+                data: {'id': id},
+                success: function (res) {
+                    if (res.err === 0) {
+                        layer.msg('已启用!', {icon: 1, time: 1000}, function () {
+                            clearCache();
+                            location.reload();
+                        });
+                    } else {
+                        layer.msg('操作出错', {icon: 5, time: 1000})
+                    }
+                }
+            })
+        });
+    }
+
+    function checkupdate() {
+        layer.open({
+            type: 1,
+            title: false,
+            area: ['630px', '360px'],
+            content: '<p></p><p style="padding-left:15px;font-weight: 400;color:#999;">检查更新中，请耐心等待</p>'
+        });
+
+        $.ajax({
+            url: '{:url("index/upgrade")}',
+            type:'post',
+            success:function (data) {
+                $('.layui-layer-content').append(data);
+            }
+        })
+    }
+
+    function runDatetimePicker() {
+        $("#search-datetime-start").datetimepicker({
+            language: 'zh-cn',
+            format: 'yyyy-mm-dd hh:ii',
+            minView: "month",
+            todayBtn: 1,
+            autoclose: 1,
+            endDate: new Date(),
+        }).on('changeDate', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            var startTime = event.date;
+            $('#search-datetime-end').datetimepicker('setStartDate', startTime);
+        });
+        $("#search-datetime-end").datetimepicker({
+            language: 'zh-cn',
+            format: 'yyyy-mm-dd hh:ii',
+            minView: "month",
+            todayBtn: 1,
+            autoclose: 1,
+            endDate: new Date(),
+        }).on('changeDate', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            var endTime = event.date;
+            $("#search-datetime-start").datetimepicker('setEndDate', endTime);
+        });
+    }
+
+    $('#cbx').click(function () {
+        var cbxs = $('.cbx');
+        var flag = $('#cbx').prop("checked");
+        $.each(cbxs, function (index, value) {
+            $(value).prop("checked", flag);
+        })
+    })
+
+    function delAll(tip, controller,str = '确定要执行操作吗?') {
+        var cbxs = $('.cbx:checked');
+        var arr = [];
+        $.each(cbxs, function (index, value) {
+            arr.push($(value).attr('data-val'));
+        })
+        if (arr.length <= 0) {
+            layer.msg(tip, {icon: 2});
+        } else {
+            layer.confirm(str, {icon: 3, title:'提示'}, function(index){
+                //do something
+                $.ajax({
+                    type: 'post',
+                    url: '{:url("' + controller + '/deleteAll")}',
+                    data: {ids: arr},
+                    cache:false,
+                    success(res) {
+                        // if (controller == 'books') {\
+                        let msg = ''
+                        if(!res.msg || !res) {
+                            msg = '操作成功'
+                        } else {
+                            msg = res.msg
+                        }
+                        if (res.err === 0) {
+                            layer.msg(msg, {icon: 1, time: 1000}, function () {
+                                clearCache();
+                                layer.close(index);
+                                window.location.reload(true)
+                            });
+                        } else {
+                            layer.msg(msg, {icon: 2, time: 1000}, function () {
+                                window.location.reload(true)
+                            });
+                        }
+                    }
+                })
+
+            });
+
+
+        }
+    }
+
+    function clearCache() {
+        $.ajax({
+            url:"{:url('index/clearCache')}",
+            type:'get',
+            success(res) {
+                layer.msg('缓存清理成功', {icon: 1, time: 1000}, function () {
+                    location.reload();
+                });
+            },
+            error(data) {
+                layer.msg('缓存清理失败', {icon: 2, time: 1000}, function () {
+                    location.reload();
+                });
+            }
+        })
+    }
+
+    function subResHandle(res) {
+        if (res.err === 0) {
+            layer.msg(res.msg, {icon: 1, time: 1000}, function () {
+                //刷新父页面
+                window.parent.location.reload();
+                //关闭当前弹窗
+                var index = parent.layer.getFrameIndex(window.name);
+                clearCache();
+                parent.layer.close(index);
+            });
+        } else {
+            layer.msg(res.msg, {icon: 5, time: 1000});
+        }
+    }
+
+    function subFormData(name = 'create',form_name = "form") {
+        let data = new window.FormData(document.getElementById(form_name))
+        $.ajax({
+            type : "POST",
+            url : "{:url('"+name+"')}",
+            data : data,
+            contentType: false,
+            processData: false,
+            success : function(msg) {
+                subResHandle(msg)
+            },
+            error: (err) => {
+                console.log('err', err)
+            }
+        });
+    }
+
+    function restoreAll(tip, controller) {
+        var cbxs = $('.cbx:checked');
+        var arr = [];
+        $.each(cbxs, function (index, value) {
+            arr.push($(value).attr('data-val'));
+        })
+        if (arr.length <= 0) {
+            layer.msg(tip, {icon: 2});
+        } else {
+            $.ajax({
+                type: 'post',
+                url: '{:url("' + controller + '/restoreAll")}',
+                data: {ids: arr},
+                cache:false,
+                success(res) {
+                    // if (controller == 'books') {\
+                    let msg = ''
+                    if(!res.msg || !res) {
+                        msg = '操作成功'
+                    } else {
+                        msg = res.msg
+                    }
+                    if (res.err === 0) {
+                        layer.msg(msg, {icon: 1, time: 1000}, function () {
+                            clearCache();
+                            window.location.reload(true)
+                        });
+                    } else {
+                        layer.msg(msg, {icon: 2, time: 1000}, function () {
+                            window.location.reload(true)
+                        });
+                    }
+                }
+            })
+        }
+    }
+</script>
+<script src="/static/js/common.js"></script>

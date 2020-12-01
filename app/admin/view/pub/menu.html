@@ -1,0 +1,155 @@
+<style>
+    .activeLi{
+        color: #f37b1d!important;
+    }
+</style>
+<!-- <script src="/static/js/jquery.min.js"></script> -->
+
+<aside class="Hui-admin-aside-wrapper" style="z-index: 1989111014;">
+    <div class="Hui-admin-logo-wrapper">
+        <a class="logo navbar-logo" href="{:url('index')->domain(false)}">
+            <i class="va-m iconpic global-logo"></i>
+            <span class="va-m">漫画CMS</span>
+        </a>
+    </div>
+    <div class="Hui-admin-menu-dropdown bk_2">
+        <dl class="Hui-menu">
+            <dt id="m-0" onclick="setMenu(0)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe616;</i> 漫画管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-0" class="Hui-menu-item">
+                <ul>
+<!--                    <li style="display: none;">{php} echo url('dsfds/sdfsdf'){/php}</li>-->
+                    <li id="l-0" onclick="setLi(0)"><a href="{:url('books/index')->domain(false)}">漫画列表</a></li>
+                    <li id="l-1" onclick="setLi(1)"><a href="{:url('books/disabled')->domain(false)}">下架漫画列表</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-1" onclick="setMenu(1)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe616;</i> 文章管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-1" class="Hui-menu-item">
+                <ul>
+                    <li id="l-2" onclick="setLi(2)"><a href="{:url('articles/index')->domain(false)}">文章列表</a></li>
+                    <li id="l-3" onclick="setLi(3)"><a href="{:url('articles/match')->domain(false)}">匹配漫画</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-2" onclick="setMenu(2)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe616;</i> 地区管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-2" class="Hui-menu-item">
+                <ul>
+                    <li id="l-4" onclick="setLi(4)"><a href="{:url('areas/index')->domain(false)}" style="display: none">地区列表</a></li>
+                    <li id="l-5" onclick="setLi(5)"><a href="{:url('areas/index')->domain(false)}">地区列表</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-3" onclick="setMenu(3)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe616;</i> 题材管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-3" class="Hui-menu-item">
+                <ul>
+                    <li id="l-6" onclick="setLi(6)"><a href="{:url('tag/index')->domain(false)}">题材列表</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-4" onclick="setMenu(4)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe616;</i> 专题管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-4" class="Hui-menu-item">
+                <ul>
+                    <li id="l-7" onclick="setLi(7)"><a href="{:url('topics/index')->domain(false)}">专题列表</a></li>
+                    <li id="l-8" onclick="setLi(8)"><a href="{:url('topics/baidudrop')->domain(false)}">百度下拉</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-5" onclick="setMenu(5)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe60d;</i> 作者管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-5" class="Hui-menu-item">
+                <ul>
+                    <li id="l-9" onclick="setLi(9)"><a href="{:url('authors/index')->domain(false)}">作者列表</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-6" onclick="setMenu(6)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe613;</i> 轮播管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-6" class="Hui-menu-item">
+                <ul>
+                    <li id="l-10" onclick="setLi(10)"><a href="{:url('banners/index')->domain(false)}">H5轮播列表</a></li>
+                    <li id="l-11" onclick="setLi(11)"><a href="{:url('banners/pcIndex')->domain(false)}">PC轮播列表</a></li>
+                </ul>
+            </dd>
+        </dl>
+        {if session("xwx_admin_type") == 1}
+        <dl class="Hui-menu">
+            <dt id="m-7" onclick="setMenu(7)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe62d;</i> 管理员管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-7" class="Hui-menu-item">
+                <ul>
+                    <li id="l-12" onclick="setLi(12)"><a href="{:url('admins/index')->domain(false)}">管理员列表</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-8" onclick="setMenu(8)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe60d;</i> 用户管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-8" class="Hui-menu-item">
+                <ul>
+                    <li id="l-13" onclick="setLi(13)"><a href="{:url('users/index')->domain(false)}">正常用户列表</a></li>
+                    <li id="l-14" onclick="setLi(14)"><a href="{:url('users/disabled')->domain(false)}">锁定用户列表</a></li>
+                    <li id="l-15" onclick="setLi(15)"><a href="{:url('users/subusers')->domain(false)}">下级用户列表</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-9" onclick="setMenu(9)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe620;</i> 支付管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-9" class="Hui-menu-item">
+                <ul>
+                   <!-- <li onclick="setLi(15)"><a href="{:url('payment/index')->domain(false)}">支付设置</a></li> -->
+                    <li id="l-16" onclick="setLi(16)"><a href="{:url('payment/orders')->domain(false)}">订单管理</a></li>
+                    <li id="l-17" onclick="setLi(17)"><a href="{:url('payment/finance')->domain(false)}">财务记录</a></li>
+                    <li id="l-18" onclick="setLi(18)"><a href="{:url('payment/buy')->domain(false)}">购买记录</a></li>
+                    <li id="l-19" onclick="setLi(19)"><a href="{:url('payment/charge')->domain(false)}">代充值</a></li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-10" onclick="setMenu(10)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe62e;</i> 卡密管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-10" class="Hui-menu-item">
+                <ul>
+                    <li id="l-20" onclick="setLi(20)"><a href="{:url('vipcodes/index')->domain(false)}">vip码管理</a></li>
+                    <li id="l-21" onclick="setLi(21)"><a href="{:url('chargecodes/index')->domain(false)}">充值码管理</a></li>
+                    <li id="l-22" onclick="setLi(22)"><a href="{:url('index/kamiconfig')->domain(false)}"></a></li>
+                    <!-- <li onclick="setLi(22)"><a href="{:url('index/kamiconfig')->domain(false)}">卡密生成设置</a></li> -->
+                </ul>
+            </dd>
+        </dl>
+        <dl class="Hui-menu">
+            <dt id="m-11" onclick="setMenu(11)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe622;</i> 短信管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-11" class="Hui-menu-item">
+                <ul>
+                    <li id="l-23" onclick="setLi(23)"><a href="{:url('sms/smsbao')->domain(false)}">短信宝设置</a></li>
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+        <dl class="Hui-menu">
+            <dt id="m-12" onclick="setMenu(12)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe622;</i> 评论管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-12" class="Hui-menu-item">
+                <ul>
+                    <li id="l-24" onclick="setLi(24)"><a href="{:url('messages/index')->domain(false)}">留言管理</a></li>
+                    <li id="l-25" onclick="setLi(25)"><a href="{:url('comment/index')->domain(false)}">评论管理</a></li>
+                </ul>
+            </dd>
+        </dl>
+        {if session("xwx_admin_type") == 1}
+        <dl class="Hui-menu">
+            <dt id="m-13" onclick="setMenu(13)" class="Hui-menu-title"><i class="Hui-iconfont">&#xe62e;</i> 其他管理<i class="Hui-iconfont Hui-admin-menu-dropdown-arrow">&#xe6d5;</i></dt>
+            <dd id="i-13" class="Hui-menu-item">
+                <ul>
+<!--                    <li onclick="setLi(26)"><a href="{:url('index/index')->domain(false)}">系统设置</a></li>-->
+<!--                    <li onclick="setLi(27)"><a href="{:url('index/seo')->domain(false)}">SEO设置</a></li>-->
+<!--                    <li onclick="setLi(28)"><a href="{:url('index/routeconfig')->domain(false)}">路由管理</a></li>-->
+                    <li id="l-26" onclick="setLi(26)"><a href="{:url('friendshiplinks/index')->domain(false)}">友链设置</a></li>
+                    <li id="l-27" onclick="setLi(27)"><a href="{:url('sitemap/index')->domain(false)}">网站地图</a></li>
+                    <li id="l-28" onclick="setLi(28)"><a href="{:url('ExtraConfig/index')->domain(false)}">平台设置</a></li>
+                </ul>
+            </dd>
+        </dl>
+        {/if}
+    </div>
+</aside>
+<div class="Hui-admin-aside-mask"></div>
